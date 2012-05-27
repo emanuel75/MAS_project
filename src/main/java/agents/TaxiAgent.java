@@ -1,5 +1,8 @@
 package agents;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -49,6 +52,8 @@ public class TaxiAgent extends Agent implements TickListener {
 		if(!hasAgent){
 			foundAgent = false;
 			Queue<Message> messages = mailbox.getMessages();
+//			ClientAgent closestClient = null;
+//			Double closestDistance = null;
 			ClientPath closestClient = null;
 			for(Message message : messages){
 				if(!hasAgent && message instanceof ConfirmationMessage){
@@ -57,6 +62,17 @@ public class TaxiAgent extends Agent implements TickListener {
 					this.packageId = client.getClient().getPackageID();
 					this.destination = client.getClient().getDeliveryLocation();
 					this.path = cm.getClosestClient().getPath();
+					try {
+						if(path.peek().equals(new Point(3307858.705598892,2.5706256583038166E7))){
+						PrintWriter pw = new PrintWriter(new FileWriter("path.txt"));
+						for(Point p : path){
+							pw.println(p);
+						}
+						pw.close();
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 					this.hasAgent = true;
 					System.out.println("[" + truck.getTruckID() + "] I made a contract with: " + this.packageId);
 					this.shouldDeliver = true;
@@ -66,10 +82,22 @@ public class TaxiAgent extends Agent implements TickListener {
 					BroadcastMessage bm = (BroadcastMessage) message;
 					ExplorationAnt eAnt= new ExplorationAnt(this, getPosition(), bm.getClients());
 					eAnt.initRoadUser(truck.getRoadModel());
-					closestClient = eAnt.lookForClient(getPosition());
+					closestClient = eAnt.lookForClient();
+					System.out.println(closestClient==null);
 					if(closestClient != null){
 						foundAgent = true;
 					}
+//					ClientAgent client;
+//					Iterator<ClientAgent> it = bm.getClients().iterator(); 
+//					while(it.hasNext()){
+//						client = it.next();
+//						double distance = Graphs.pathLength(truck.getRoadModel().getShortestPathTo(truck, client.getPosition()));
+//						if (!foundAgent || distance < closestDistance){
+//							foundAgent = true;
+//							closestClient = client;
+//							closestDistance = distance;
+//						}
+//					} 
 				}
 			}
 			if(!hasAgent && foundAgent){
@@ -77,15 +105,18 @@ public class TaxiAgent extends Agent implements TickListener {
 				System.out.println(closestClient.getPath().size());
 				System.out.println(closestClient.getTravelTime());
 				agency.receive(new BidMessage(this,closestClient));
+//				Queue q = new LinkedList<Point>();
+//				q.addAll(truck.getRoadModel().getShortestPathTo(getPosition(),closestClient.getPosition()));
+//				agency.receive(new BidMessage(this, new ClientPath(q,closestDistance, closestClient)));
 			}
 		}
 		if(path == null || path.isEmpty()){
-			if(truck.tryPickup()){
+			if(foundAgent && truck.tryPickup()){
 				this.shouldPickup = false;
 				System.out.println("[" + truck.getTruckID() + "] I picked up " + this.packageId);
 				this.path = new LinkedList<Point>(truck.getRoadModel().getShortestPathTo(truck, destination));
 			}
-			if(truck.tryDelivery()){
+			if(hasAgent && truck.tryDelivery()){
 				this.shouldDeliver = false;
 				System.out.println("[" + truck.getTruckID() + "] I delivered " + this.packageId);
 				hasAgent = false;

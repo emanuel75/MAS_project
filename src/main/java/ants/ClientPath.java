@@ -29,5 +29,9 @@ public class ClientPath {
 	public ClientAgent getClient() {
 		return client;
 	}
+	
+	public void setPath(Queue<Point> path) {
+		this.path = path;
+	}
 
 }
