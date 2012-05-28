@@ -7,8 +7,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.TreeMap;
 
 import agents.ClientAgent;
+import agents.ResourceAgent;
 import agents.TaxiAgent;
 
 import rinde.sim.core.graph.EdgeData;
@@ -26,6 +28,7 @@ public class ExplorationAnt extends Ant {
 	private double minDistance=-1;
 	private boolean mainAnt;
 	private HashMap<Point,ClientPath> paths;
+	private ResourceAgent res;
 		
 	public ExplorationAnt(TaxiAgent taxi, Point startLocation, HashSet<ClientAgent> clients){
 		super(taxi,startLocation);
@@ -34,6 +37,7 @@ public class ExplorationAnt extends Ant {
 		this.oldVisitedNodes = new LinkedList<Point>();
 		this.mainAnt = true;
 		this.paths = new HashMap<Point, ClientPath>();
+		this.res = taxi.getResource(startLocation);
 	}
 	
 	public ExplorationAnt(TaxiAgent taxi, Point startLocation, double minDistance, HashSet<ClientAgent> clients, List<Point> oldVisitedNodes, HashMap<Point,ClientPath> paths){
@@ -102,21 +106,23 @@ public class ExplorationAnt extends Ant {
 	public ClientPath lookForClient(){
 //		System.out.println(startLocation);
 		// if the shortest path from this node is already known, it will be returned
-		if(paths.containsKey(startLocation)){
-			Queue<Point> completePath = new LinkedList<Point>();
-			completePath.addAll(oldVisitedNodes);
-			completePath.addAll(paths.get(startLocation).getPath());
-			return new ClientPath(completePath, paths.get(startLocation).getTravelTime(), paths.get(startLocation).getClient());
-		}
+//		if(paths.containsKey(startLocation)){
+//			Queue<Point> completePath = new LinkedList<Point>();
+//			completePath.addAll(oldVisitedNodes);
+//			completePath.addAll(paths.get(startLocation).getPath());
+//			return new ClientPath(completePath, paths.get(startLocation).getTravelTime(), paths.get(startLocation).getClient());
+//		}
 		
 		Collection<Point> neighbours = rm.getGraph().getOutgoingConnections(startLocation);
 		Iterator<Point> it;
+		Iterator<Double> nodes;
 		Iterator<ClientAgent> cl;
 		Point nextNode;
 		ExplorationAnt newAnt;
 		ClientAgent client;
 		ClientPath antPath;
 		ClientPath bestPath = null;
+		ResourceAgent nextRes;
 		
 		//The oldVisitNodes containes the nodes were visited earlier on this path
 		visitedNodes.addAll(oldVisitedNodes);
@@ -127,24 +133,67 @@ public class ExplorationAnt extends Ant {
 		while(cl.hasNext()){
 			client = cl.next();
 			if(rm.containsObjectAt(client.getClient(), startLocation)){
+				ClientPath myPath = new ClientPath(new LinkedList<Point>(), 0, client); 
+				res.setBestClient(myPath);
+				res.setClientPath(client, myPath);
+				res.setExplored(true);
 				return new ClientPath(visitedNodes, 0, client);
 			}
 		}
 		
+		
 		double myMinDistance = computeMinDistance();
-		it = neighbours.iterator();
-		int j=0;
 		//We have to control how far the ants can go, because the computation time would be too much otherwise
 		//The minDistance is the minimum distance between the initial startLocation and the closest client returned by Graphs.getShortestPathTo which uses an A* search with Eucledian heuristics
 		//myMinDistance is the same distance, but not from the initial startLocation but from the current position
-		while(Graphs.pathLength((LinkedList<Point>) visitedNodes)+myMinDistance<=1.1*minDistance && it.hasNext() && (j<2 || bestPath==null)){
-			j++;
-			//We have to use an other visitedNodes collection, because otherwise the visitedNodes would be modified by every ants created
-			oldVisitedNodes = new LinkedList<Point>();
-			oldVisitedNodes.addAll(visitedNodes);
-			nextNode = it.next();
-			//We don't want to step into circles
-			if(!visitedNodes.contains(nextNode)){
+		if(Graphs.pathLength((LinkedList<Point>) visitedNodes)+myMinDistance<=2*minDistance){
+			it = neighbours.iterator();
+			TreeMap<Double,Point> options = new TreeMap<Double, Point>();
+			double notExplored = 0;
+			double newTime;
+			while(it.hasNext()){
+				nextNode = it.next();
+				nextRes = ((TaxiAgent) agent).getResource(nextNode);
+				if(!visitedNodes.contains(nextNode) /*&& !nextNode.equals(new Point(3304702.8030133694,2.5709013414073147E7))*/){
+					notExplored--;
+					if(!nextRes.isExplored()){
+						options.put(notExplored,nextNode);
+					}
+					else if(clients.contains(nextRes.getBestClient().getClient())){
+						newTime = computeTravelTime(startLocation,nextNode) + nextRes.getBestClient().getTravelTime();
+						if(options.containsKey(newTime)){
+							options.put(newTime+0.001, nextNode);
+						}
+						else{
+							options.put(newTime, nextNode);
+						}
+					}
+					else{
+						double bestTime = notExplored;
+						cl = clients.iterator();
+						client = cl.next();
+						while(cl.hasNext()){
+							if(nextRes.exploredClient(client)){
+								newTime = computeTravelTime(startLocation,nextNode) + nextRes.getClientPath(client).getTravelTime();
+								if(bestTime<0 || newTime<bestTime){
+									bestTime = newTime;
+								}
+							}
+						}
+						options.put(bestTime, nextNode);
+					}
+				}
+			}
+			
+			nodes = options.keySet().iterator();
+			Double nextTime = null;
+			if(nodes.hasNext()){
+				nextTime = nodes.next();
+			}
+			while(nextTime!=null && (bestPath==null || nextTime<bestPath.getTravelTime())){
+				nextNode = options.get(nextTime);
+				oldVisitedNodes = new LinkedList<Point>();
+				oldVisitedNodes.addAll(visitedNodes);
 				//We create a new ant which would do the same thing than this one, but from the next neighbor
 				//Thus it will return the best path from the next node, here we have to decide
 				//which neighbor is the best taking into account the travelTime of the best path from the neighbor
@@ -154,22 +203,42 @@ public class ExplorationAnt extends Ant {
 				antPath = newAnt.lookForClient();
 				//If the created ant found a path and it is better than the path found so far, we store it in the bestPath
 				if(antPath != null){
+//					if(startLocation.equals(new Point(3304221.306136328,2.5708335364835046E7)))
+//						System.out.println(nextNode + ": "  + Graphs.pathLength((LinkedList<Point>) antPath.getPath()));
 					double newTravelTime = antPath.getTravelTime()+computeTravelTime(startLocation,nextNode);
 					if(mainAnt)
 						System.out.println("TravelTime: " + newTravelTime + ", " + antPath.getPath().size());
 					if(bestPath==null || bestPath.getTravelTime()>newTravelTime){
-						bestPath = new ClientPath(antPath.getPath(), newTravelTime, antPath.getClient());		
+						bestPath = new ClientPath(antPath.getPath(), newTravelTime, antPath.getClient());
 					}
+				}
+				
+				if(nodes.hasNext()){
+					nextTime = nodes.next();
+				}
+				else{
+					nextTime = null;
 				}
 			}
 		}
 		
 		//If we found a path from this node, we store is so that we can use it later
-		if(bestPath != null && Graphs.pathLength((LinkedList<Point>) bestPath.getPath())<=1.2*minDistance){
-			LinkedList<Point> myPath = (LinkedList<Point>) bestPath.getPath();
-			Queue<Point> myPathQ = new LinkedList<Point>();
-			myPathQ.addAll(myPath.subList(myPath.lastIndexOf(startLocation), myPath.size()));
-			paths.put(startLocation, new ClientPath(myPathQ, bestPath.getTravelTime(), bestPath.getClient()));
+//		if(bestPath != null && Graphs.pathLength((LinkedList<Point>) bestPath.getPath())<=1.2*minDistance){
+//			LinkedList<Point> myPath = (LinkedList<Point>) bestPath.getPath();
+//			Queue<Point> myPathQ = new LinkedList<Point>();
+//			myPathQ.addAll(myPath.subList(myPath.lastIndexOf(startLocation), myPath.size()));
+//			paths.put(startLocation, new ClientPath(myPathQ, bestPath.getTravelTime(), bestPath.getClient()));
+//		}
+		
+		if(bestPath!=null){
+			if(!res.isExplored() || !res.exploredClient(bestPath.getClient()) ||
+				res.getClientPath(bestPath.getClient()).getTravelTime() > bestPath.getTravelTime()){
+				res.setClientPath(bestPath.getClient(), bestPath);
+				if(!res.isExplored() || res.getBestClient().getTravelTime() > bestPath.getTravelTime()){
+					res.setBestClient(bestPath);
+				}
+				res.setExplored(true);
+			}
 		}
 		
 		return bestPath;

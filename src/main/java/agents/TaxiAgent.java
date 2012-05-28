@@ -64,13 +64,11 @@ public class TaxiAgent extends Agent implements TickListener {
 					this.destination = client.getClient().getDeliveryLocation();
 					this.path = cm.getClosestClient().getPath();
 					try {
-						if(path.peek().equals(new Point(3307858.705598892,2.5706256583038166E7))){
 						PrintWriter pw = new PrintWriter(new FileWriter("path.txt"));
 						for(Point p : path){
 							pw.println(p);
 						}
 						pw.close();
-						}
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -131,6 +129,10 @@ public class TaxiAgent extends Agent implements TickListener {
 		}else if(hasAgent){
 			truck.drive(path, timeStep);
 		}
+	}
+	
+	public ResourceAgent getResource(Point node){
+		return agency.getResource(node);
 	}
 	
 	@Override
