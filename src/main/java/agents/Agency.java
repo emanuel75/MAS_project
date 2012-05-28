@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Queue;
+import java.util.Set;
 
 
 import messages.BidMessage;
@@ -12,15 +13,39 @@ import messages.ClientRequestMessage;
 import messages.ConfirmationMessage;
 
 import rinde.sim.core.TickListener;
+import rinde.sim.core.graph.Point;
+import rinde.sim.core.model.RoadModel;
 import rinde.sim.core.model.communication.Message;
 
 public class Agency extends Agent implements TickListener {
 	
 	private HashMap<ClientAgent,TaxiAgent> clients;
+	private HashMap<Point, ResourceAgent> resources;
+	private RoadModel rm;
 
 	public Agency(double radius, double reliability){
 		super(radius, reliability);
 		this.clients = new HashMap<ClientAgent, TaxiAgent>();
+		this.resources = new HashMap<Point, ResourceAgent>();
+	}
+	
+	public void initialize(RoadModel rm){
+		this.rm = rm;
+		Set<Point> nodes = rm.getGraph().getNodes();
+		Iterator<Point> it = nodes.iterator();
+		ResourceAgent res;
+		while(it.hasNext()){
+			res = new ResourceAgent(it.next());
+			addResource(res);
+		}
+	}
+	
+	public void addResource(ResourceAgent res){
+		resources.put(res.getNode(), res);
+	}
+	
+	public ResourceAgent getResource(Point point){
+		return resources.get(point);
 	}
 
 	@Override
@@ -45,6 +70,7 @@ public class Agency extends Agent implements TickListener {
 		ClientAgent client;
 		while(it.hasNext()){
 			client = it.next();
+			clients.put(client, (TaxiAgent) bestBids.get(client).getSender());
 			bestBids.get(client).getSender().receive(new ConfirmationMessage(this,bestBids.get(client).getClosestClient()));
 		}
 		

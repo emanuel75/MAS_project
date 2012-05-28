@@ -12,7 +12,7 @@ import rinde.sim.scenario.TimedEvent;
 public class Example {
 	
 	public static void main(String[] args) throws Exception{
-		ScenarioBuilder builder = new ScenarioBuilder(StandardType.ADD_TRUCK, StandardType.ADD_PACKAGE, MyType.ADD_AGENCY);
+		ScenarioBuilder builder = new ScenarioBuilder(StandardType.ADD_TRUCK, StandardType.ADD_PACKAGE, MyType.ADD_AGENCY, MyType.ADD_RESOURCE);
 		
 		builder.add(
 				new ScenarioBuilder.MultipleEventGenerator<TimedEvent>(
@@ -24,10 +24,20 @@ public class Example {
 				)
 		);
 		
+//		builder.add(
+//				new ScenarioBuilder.MultipleEventGenerator<TimedEvent>(
+//						0, //at time 0
+//						1, 
+//						new ScenarioBuilder.EventTypeFunction(
+//								MyType.ADD_RESOURCE
+//						)
+//				)
+//		);
+		
 		builder.add(
 				new ScenarioBuilder.MultipleEventGenerator<TimedEvent>(
 						0, //at time 0
-						3, //amount of trucks to be added
+						1, //amount of trucks to be added
 						new ScenarioBuilder.EventTypeFunction(
 								StandardType.ADD_TRUCK
 						)

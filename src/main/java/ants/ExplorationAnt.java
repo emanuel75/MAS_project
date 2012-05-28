@@ -133,10 +133,12 @@ public class ExplorationAnt extends Ant {
 		
 		double myMinDistance = computeMinDistance();
 		it = neighbours.iterator();
+		int j=0;
 		//We have to control how far the ants can go, because the computation time would be too much otherwise
 		//The minDistance is the minimum distance between the initial startLocation and the closest client returned by Graphs.getShortestPathTo which uses an A* search with Eucledian heuristics
 		//myMinDistance is the same distance, but not from the initial startLocation but from the current position
-		while(Graphs.pathLength((LinkedList<Point>) visitedNodes)+myMinDistance<=1.5*minDistance && it.hasNext()){
+		while(Graphs.pathLength((LinkedList<Point>) visitedNodes)+myMinDistance<=1.1*minDistance && it.hasNext() && (j<2 || bestPath==null)){
+			j++;
 			//We have to use an other visitedNodes collection, because otherwise the visitedNodes would be modified by every ants created
 			oldVisitedNodes = new LinkedList<Point>();
 			oldVisitedNodes.addAll(visitedNodes);
@@ -163,7 +165,7 @@ public class ExplorationAnt extends Ant {
 		}
 		
 		//If we found a path from this node, we store is so that we can use it later
-		if(bestPath != null && Graphs.pathLength((LinkedList<Point>) bestPath.getPath())<=1.02*minDistance){
+		if(bestPath != null && Graphs.pathLength((LinkedList<Point>) bestPath.getPath())<=1.2*minDistance){
 			LinkedList<Point> myPath = (LinkedList<Point>) bestPath.getPath();
 			Queue<Point> myPathQ = new LinkedList<Point>();
 			myPathQ.addAll(myPath.subList(myPath.lastIndexOf(startLocation), myPath.size()));

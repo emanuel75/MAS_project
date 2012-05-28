@@ -1,11 +1,15 @@
 package pdp;
 
 
+import java.util.Iterator;
+import java.util.Set;
+
 import org.apache.commons.math.random.MersenneTwister;
 import org.eclipse.swt.graphics.RGB;
 
 import agents.Agency;
 import agents.ClientAgent;
+import agents.ResourceAgent;
 import agents.TaxiAgent;
 
 import rinde.sim.core.Simulator;
@@ -79,8 +83,8 @@ public class SimpleController extends ScenarioController{
 	
 	@Override
 	protected boolean handleAddAgency(Event e) {
+		agency.initialize(roadModel);
 		getSimulator().register(agency);
-		System.out.println("Hozzáadtam");
 		return true;
 	}	
 	
@@ -104,6 +108,20 @@ public class SimpleController extends ScenarioController{
 		getSimulator().register(p);
 		ClientAgent agent = new ClientAgent(p, agency, -1, 1);
 		getSimulator().register(agent);
+		return true;
+	}
+	
+	@Override
+	protected boolean handleAddResource(Event e){
+		System.out.println("lefutottam");
+		Set<Point> nodes = roadModel.getGraph().getNodes();
+		Iterator<Point> it = nodes.iterator();
+		ResourceAgent res;
+		while(it.hasNext()){
+			res = new ResourceAgent(it.next());
+			agency.addResource(res);
+			getSimulator().register(res);
+		}
 		return true;
 	}
 
