@@ -26,6 +26,10 @@ public class ClientAgent extends Agent {
 		return this.myClient.getPickupLocation();
 	}
 	
+	public Point getDeliveryLocation(){
+		return myClient.getDeliveryLocation();
+	}
+	
 	public Package getClient(){
 		return myClient;
 	}

@@ -9,6 +9,7 @@ import java.util.Queue;
 
 import ants.ClientPath;
 import ants.ExplorationAnt;
+import ants.ExplorationAnt.Mode;
 
 
 import messages.BidMessage;
@@ -84,7 +85,7 @@ public class TaxiAgent extends Agent implements TickListener {
 //					System.out.println("Try to find new package");
 					foundAgent = false;
 					BroadcastMessage bm = (BroadcastMessage) message;
-					eAnt= new ExplorationAnt(this, getPosition(), bm.getClients());
+					eAnt= new ExplorationAnt(this, getPosition(), bm.getClients(), Mode.EXPLORE_PACKAGES);
 					eAnt.initRoadUser(truck.getRoadModel());
 					closestClient = eAnt.lookForClient();
 					System.out.println(closestClient==null);
@@ -118,7 +119,14 @@ public class TaxiAgent extends Agent implements TickListener {
 			if(foundAgent && truck.tryPickup()){
 				this.shouldPickup = false;
 				System.out.println("[" + truck.getTruckID() + "] I picked up " + this.packageId);
-				this.path = new LinkedList<Point>(truck.getRoadModel().getShortestPathTo(truck, destination));
+				
+				HashSet<ClientAgent> toDeliver = new HashSet<ClientAgent>();
+				toDeliver.add(client);
+				eAnt = new ExplorationAnt(this, getPosition(), toDeliver, Mode.EXPLORE_DELIVERY_LOC);
+				eAnt.initRoadUser(truck.getRoadModel());
+				this.path = eAnt.lookForClient().getPath();
+				this.path.add(client.getDeliveryLocation());
+//				this.path = new LinkedList<Point>(truck.getRoadModel().getShortestPathTo(truck, destination));
 			}
 			if(hasAgent && truck.tryDelivery()){
 				this.shouldDeliver = false;
@@ -131,14 +139,22 @@ public class TaxiAgent extends Agent implements TickListener {
 				this.path = new LinkedList<Point>(truck.getRoadModel().getShortestPathTo(truck, destination));
 			}
 		}else if(hasAgent){
-			if(shouldPickup){
+			if(shouldPickup || shouldDeliver){
 				if(nextStep.isEmpty() && !path.isEmpty()){
 					HashSet<ClientAgent> toExplore = new HashSet<ClientAgent>();
 					toExplore.add(client);
-					eAnt = new ExplorationAnt(this, getPosition(), toExplore);
-					eAnt.initRoadUser(truck.getRoadModel());
-					closestClient = eAnt.lookForClient();
-					setClient(closestClient);
+					if(shouldPickup){
+						eAnt = new ExplorationAnt(this, getPosition(), toExplore, Mode.EXPLORE_PACKAGES);
+						eAnt.initRoadUser(truck.getRoadModel());
+						closestClient = eAnt.lookForClient();
+						setClient(closestClient);
+					}
+					else if(shouldDeliver){
+						eAnt = new ExplorationAnt(this, getPosition(), toExplore, Mode.EXPLORE_DELIVERY_LOC);
+						eAnt.initRoadUser(truck.getRoadModel());
+						this.path = eAnt.lookForClient().getPath();
+						this.path.add(client.getDeliveryLocation());
+					}
 					if(path.peek().equals(getPosition())){
 						path.poll();
 					}

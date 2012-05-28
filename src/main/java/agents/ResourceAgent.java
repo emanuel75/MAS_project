@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import ants.ClientPath;
 
-import rinde.sim.core.TickListener;
 import rinde.sim.core.graph.Point;
 
 public class ResourceAgent{ //extends Agent implements TickListener {
@@ -12,12 +11,14 @@ public class ResourceAgent{ //extends Agent implements TickListener {
 	private Point node;
 	private ClientPath bestClient;
 	private HashMap<ClientAgent,ClientPath> clients;
+	private HashMap<ClientAgent,ClientPath> deliveryLocs;
 	private boolean explored;
 
 	public ResourceAgent(Point node){
 		this.node = node;
 		this.explored = false;
 		this.clients = new HashMap<ClientAgent, ClientPath>();
+		this.deliveryLocs = new HashMap<ClientAgent, ClientPath>();
 	}
 	
 	public Point getNode() {
@@ -42,6 +43,18 @@ public class ResourceAgent{ //extends Agent implements TickListener {
 	
 	public boolean exploredClient(ClientAgent client){
 		return clients.containsKey(client);
+	}
+	
+	public ClientPath getDeliveryPath(ClientAgent client) {
+		return deliveryLocs.get(client);
+	}
+	
+	public void setDeliveryPath(ClientAgent client, ClientPath path){
+		deliveryLocs.put(client, path);
+	}
+	
+	public boolean exploredDeliveryLoc(ClientAgent client){
+		return deliveryLocs.containsKey(client);
 	}
 	
 	public boolean isExplored() {
