@@ -207,7 +207,7 @@ public class ExplorationAnt extends Ant {
 //						System.out.println(nextNode + ": "  + Graphs.pathLength((LinkedList<Point>) antPath.getPath()));
 					double newTravelTime = antPath.getTravelTime()+computeTravelTime(startLocation,nextNode);
 					if(mainAnt)
-						System.out.println("TravelTime: " + newTravelTime + ", " + antPath.getPath().size());
+						System.out.println("TravelTime: " + newTravelTime + ", " + antPath.getPath().size() + " --> " + antPath.getClient().getPosition());
 					if(bestPath==null || bestPath.getTravelTime()>newTravelTime){
 						bestPath = new ClientPath(antPath.getPath(), newTravelTime, antPath.getClient());
 					}

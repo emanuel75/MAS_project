@@ -3,7 +3,7 @@ package agents;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -15,14 +15,8 @@ import messages.BidMessage;
 import messages.BroadcastMessage;
 import messages.ConfirmationMessage;
 
-import rinde.sim.core.SimulatorAPI;
-import rinde.sim.core.SimulatorUser;
 import rinde.sim.core.TickListener;
-import rinde.sim.core.graph.Graphs;
 import rinde.sim.core.graph.Point;
-import rinde.sim.core.model.communication.CommunicationAPI;
-import rinde.sim.core.model.communication.CommunicationUser;
-import rinde.sim.core.model.communication.Mailbox;
 import rinde.sim.core.model.communication.Message;
 import rinde.sim.lab.common.trucks.Truck;
 
@@ -36,6 +30,10 @@ public class TaxiAgent extends Agent implements TickListener {
     private String packageId;
     private Point destination;
     private Agency agency;
+    private Queue<Point> nextStep;
+    private ExplorationAnt eAnt;
+    private ClientAgent client;
+    private ClientPath closestClient = null;
 	
 	public TaxiAgent(Truck truck, Agency agency, double radius, double reliability){
 		super(radius,reliability);
@@ -45,6 +43,15 @@ public class TaxiAgent extends Agent implements TickListener {
 		this.shouldDeliver = false;
 		this.shouldPickup = false;
 		this.agency = agency;
+		this.nextStep = new LinkedList<Point>();
+	}
+	
+	private void setClient(ClientPath clientPath){
+		this.client = clientPath.getClient();
+		this.packageId = client.getClient().getPackageID();
+		this.destination = client.getClient().getDeliveryLocation();
+		this.path = clientPath.getPath();
+		path.add(clientPath.getClient().getPosition());
 	}
 	
 	@Override
@@ -53,16 +60,12 @@ public class TaxiAgent extends Agent implements TickListener {
 			Queue<Message> messages = mailbox.getMessages();
 //			ClientAgent closestClient = null;
 //			Double closestDistance = null;
-			ClientPath closestClient = null;
 			int m = 0;
 			for(Message message : messages){
 				m++;
 				if(!hasAgent && message instanceof ConfirmationMessage){
 					ConfirmationMessage cm = (ConfirmationMessage) message;
-					ClientAgent client = cm.getClosestClient().getClient();
-					this.packageId = client.getClient().getPackageID();
-					this.destination = client.getClient().getDeliveryLocation();
-					this.path = cm.getClosestClient().getPath();
+					setClient(cm.getClosestClient());
 					try {
 						PrintWriter pw = new PrintWriter(new FileWriter("path.txt"));
 						for(Point p : path){
@@ -81,7 +84,7 @@ public class TaxiAgent extends Agent implements TickListener {
 //					System.out.println("Try to find new package");
 					foundAgent = false;
 					BroadcastMessage bm = (BroadcastMessage) message;
-					ExplorationAnt eAnt= new ExplorationAnt(this, getPosition(), bm.getClients());
+					eAnt= new ExplorationAnt(this, getPosition(), bm.getClients());
 					eAnt.initRoadUser(truck.getRoadModel());
 					closestClient = eAnt.lookForClient();
 					System.out.println(closestClient==null);
@@ -128,7 +131,24 @@ public class TaxiAgent extends Agent implements TickListener {
 				this.path = new LinkedList<Point>(truck.getRoadModel().getShortestPathTo(truck, destination));
 			}
 		}else if(hasAgent){
-			truck.drive(path, timeStep);
+			if(shouldPickup){
+				if(nextStep.isEmpty() && !path.isEmpty()){
+					HashSet<ClientAgent> toExplore = new HashSet<ClientAgent>();
+					toExplore.add(client);
+					eAnt = new ExplorationAnt(this, getPosition(), toExplore);
+					eAnt.initRoadUser(truck.getRoadModel());
+					closestClient = eAnt.lookForClient();
+					setClient(closestClient);
+					if(path.peek().equals(getPosition())){
+						path.poll();
+					}
+					nextStep.add(path.poll());
+				}
+				truck.drive(nextStep, timeStep);
+			}
+			else{
+				truck.drive(path, timeStep);
+			}
 		}
 	}
 	
