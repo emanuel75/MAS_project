@@ -146,7 +146,7 @@ public class ExplorationAnt extends Ant {
 		//We have to control how far the ants can go, because the computation time would be too much otherwise
 		//The minDistance is the minimum distance between the initial startLocation and the closest client returned by Graphs.getShortestPathTo which uses an A* search with Eucledian heuristics
 		//myMinDistance is the same distance, but not from the initial startLocation but from the current position
-		if(Graphs.pathLength((LinkedList<Point>) visitedNodes)+myMinDistance<=2*minDistance){
+		if(Graphs.pathLength((LinkedList<Point>) visitedNodes)+myMinDistance<=1.5*minDistance){
 			it = neighbours.iterator();
 			TreeMap<Double,Point> options = new TreeMap<Double, Point>();
 			double notExplored = 0;
@@ -171,8 +171,8 @@ public class ExplorationAnt extends Ant {
 					else{
 						double bestTime = notExplored;
 						cl = clients.iterator();
-						client = cl.next();
 						while(cl.hasNext()){
+							client = cl.next();
 							if(nextRes.exploredClient(client)){
 								newTime = computeTravelTime(startLocation,nextNode) + nextRes.getClientPath(client).getTravelTime();
 								if(bestTime<0 || newTime<bestTime){

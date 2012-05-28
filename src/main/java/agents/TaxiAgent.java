@@ -78,6 +78,7 @@ public class TaxiAgent extends Agent implements TickListener {
 					this.shouldPickup = true;
 				}
 				else if(!hasAgent && (!foundAgent || messages.size()==m) && message instanceof BroadcastMessage){
+//					System.out.println("Try to find new package");
 					foundAgent = false;
 					BroadcastMessage bm = (BroadcastMessage) message;
 					ExplorationAnt eAnt= new ExplorationAnt(this, getPosition(), bm.getClients());
