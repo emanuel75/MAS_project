@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -17,6 +18,7 @@ import messages.BroadcastMessage;
 import messages.ConfirmationMessage;
 
 import rinde.sim.core.TickListener;
+import rinde.sim.core.graph.Graphs;
 import rinde.sim.core.graph.Point;
 import rinde.sim.core.model.communication.Message;
 import rinde.sim.lab.common.trucks.Truck;
@@ -133,6 +135,7 @@ public class TaxiAgent extends Agent implements TickListener {
 				System.out.println("[" + truck.getTruckID() + "] I delivered " + this.packageId);
 				hasAgent = false;
 				foundAgent = false;
+				agency.freeUpTaxi();
 			}
 			if(!shouldPickup && !shouldDeliver){
 				destination = truck.getRoadModel().getGraph().getRandomNode(simulator.getRandomGenerator());

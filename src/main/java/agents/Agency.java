@@ -22,11 +22,13 @@ public class Agency extends Agent implements TickListener {
 	private HashMap<ClientAgent,TaxiAgent> clients;
 	private HashMap<Point, ResourceAgent> resources;
 	private RoadModel rm;
+	private int taxi;
 
 	public Agency(double radius, double reliability){
 		super(radius, reliability);
 		this.clients = new HashMap<ClientAgent, TaxiAgent>();
 		this.resources = new HashMap<Point, ResourceAgent>();
+		this.taxi = 0;
 	}
 	
 	public void initialize(RoadModel rm){
@@ -47,9 +49,14 @@ public class Agency extends Agent implements TickListener {
 	public ResourceAgent getResource(Point point){
 		return resources.get(point);
 	}
+	
+	public void freeUpTaxi(){
+		taxi++;
+	}
 
 	@Override
 	public void tick(long currentTime, long timeStep) {
+//		System.out.println(clients.size());
 		HashMap<ClientAgent,BidMessage> bestBids = new HashMap<ClientAgent, BidMessage>();
 		Queue<Message> messages = mailbox.getMessages();
 		for(Message message : messages){
@@ -72,18 +79,21 @@ public class Agency extends Agent implements TickListener {
 			client = it.next();
 			clients.put(client, (TaxiAgent) bestBids.get(client).getSender());
 			bestBids.get(client).getSender().receive(new ConfirmationMessage(this,bestBids.get(client).getClosestClient()));
+			taxi--;
 		}
 		
-		HashSet<ClientAgent> needTaxi = new HashSet<ClientAgent>();
-		it = clients.keySet().iterator();
-		while(it.hasNext()){
-			client = it.next();
-			if(clients.get(client)==null){
-				needTaxi.add(client);
+		if(taxi>0){
+			HashSet<ClientAgent> needTaxi = new HashSet<ClientAgent>();
+			it = clients.keySet().iterator();
+			while(it.hasNext()){
+				client = it.next();
+				if(clients.get(client)==null){
+					needTaxi.add(client);
+				}
 			}
-		}
-		if(needTaxi.size()>0){
-			communicationAPI.broadcast(new BroadcastMessage(this,needTaxi));
+			if(needTaxi.size()>0){
+				communicationAPI.broadcast(new BroadcastMessage(this,needTaxi));
+			}
 		}
 	}
 
