@@ -90,11 +90,11 @@ public class SimpleController extends ScenarioController{
 	
 	@Override
 	protected boolean handleAddTruck(Event e) {
-		agency.freeUpTaxi();
 		Truck truck = new Truck("Truck-"+truckID++, graph.getRandomNode(getSimulator().getRandomGenerator()), 7);
 		getSimulator().register(truck);
 		TaxiAgent agent = new TaxiAgent(truck, agency, -1, 1);
 		getSimulator().register(agent);
+		agency.freeUpTaxi(agent);
 		return true;
 	}	
 

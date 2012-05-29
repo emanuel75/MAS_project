@@ -1,5 +1,8 @@
 package ants;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -135,7 +138,8 @@ public class ExplorationAnt extends Ant {
 		cl = clients.iterator();
 		while(cl.hasNext()){
 			client = cl.next();
-			if(mode.equals(Mode.EXPLORE_PACKAGES) && rm.containsObjectAt(client.getClient(), startLocation)){
+			if(mode.equals(Mode.EXPLORE_PACKAGES) && startLocation.equals(client.getClient().getPickupLocation())){
+//					rm.containsObjectAt(client.getClient(), startLocation)){
 				ClientPath myPath = new ClientPath(new LinkedList<Point>(), 0, client); 
 				res.setBestClient(myPath);
 				res.setClientPath(client, myPath);

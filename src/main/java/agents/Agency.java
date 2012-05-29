@@ -15,20 +15,21 @@ import messages.ConfirmationMessage;
 import rinde.sim.core.TickListener;
 import rinde.sim.core.graph.Point;
 import rinde.sim.core.model.RoadModel;
+import rinde.sim.core.model.communication.CommunicationUser;
 import rinde.sim.core.model.communication.Message;
 
 public class Agency extends Agent implements TickListener {
 	
 	private HashMap<ClientAgent,TaxiAgent> clients;
 	private HashMap<Point, ResourceAgent> resources;
+	private HashSet<CommunicationUser> taxis;
 	private RoadModel rm;
-	private int taxi;
-
+	
 	public Agency(double radius, double reliability){
 		super(radius, reliability);
 		this.clients = new HashMap<ClientAgent, TaxiAgent>();
 		this.resources = new HashMap<Point, ResourceAgent>();
-		this.taxi = 0;
+		this.taxis = new HashSet<CommunicationUser>();
 	}
 	
 	public void initialize(RoadModel rm){
@@ -50,8 +51,8 @@ public class Agency extends Agent implements TickListener {
 		return resources.get(point);
 	}
 	
-	public void freeUpTaxi(){
-		taxi++;
+	public void freeUpTaxi(TaxiAgent taxi){
+		taxis.add(taxi);
 	}
 
 	@Override
@@ -79,10 +80,10 @@ public class Agency extends Agent implements TickListener {
 			client = it.next();
 			clients.put(client, (TaxiAgent) bestBids.get(client).getSender());
 			bestBids.get(client).getSender().receive(new ConfirmationMessage(this,bestBids.get(client).getClosestClient()));
-			taxi--;
+			taxis.remove(bestBids.get(client).getSender());
 		}
 		
-		if(taxi>0){
+		if(taxis.size()>0){
 			HashSet<ClientAgent> needTaxi = new HashSet<ClientAgent>();
 			it = clients.keySet().iterator();
 			while(it.hasNext()){
@@ -92,7 +93,10 @@ public class Agency extends Agent implements TickListener {
 				}
 			}
 			if(needTaxi.size()>0){
-				communicationAPI.broadcast(new BroadcastMessage(this,needTaxi));
+				Iterator<CommunicationUser> taxiIt = taxis.iterator();
+				while(taxiIt.hasNext()){
+					taxiIt.next().receive(new BroadcastMessage(this,needTaxi));
+				}
 			}
 		}
 	}

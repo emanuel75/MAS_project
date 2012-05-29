@@ -37,7 +37,7 @@ public class Example {
 		builder.add(
 				new ScenarioBuilder.MultipleEventGenerator<TimedEvent>(
 						0, //at time 0
-						3, //amount of trucks to be added
+						5, //amount of trucks to be added
 						new ScenarioBuilder.EventTypeFunction(
 								StandardType.ADD_TRUCK
 						)
@@ -47,7 +47,7 @@ public class Example {
 		builder.add(
 				new ScenarioBuilder.MultipleEventGenerator<TimedEvent>(
 						0, 
-						10,
+						12,
 						new ScenarioBuilder.EventTypeFunction(
 								StandardType.ADD_PACKAGE
 						)

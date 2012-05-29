@@ -60,6 +60,7 @@ public class TaxiAgent extends Agent implements TickListener {
 	@Override
 	public void tick(long currentTime, long timeStep) {
 		if(!hasAgent){
+			foundAgent = false;
 			Queue<Message> messages = mailbox.getMessages();
 //			ClientAgent closestClient = null;
 //			Double closestDistance = null;
@@ -85,12 +86,16 @@ public class TaxiAgent extends Agent implements TickListener {
 				}
 				else if(!hasAgent && (!foundAgent || messages.size()==m) && message instanceof BroadcastMessage){
 //					System.out.println("Try to find new package");
-					foundAgent = false;
 					BroadcastMessage bm = (BroadcastMessage) message;
+//					if(truck.getTruckID().equals("Truck-3")){
+//						Iterator<ClientAgent> iter = bm.getClients().iterator();
+//						while(iter.hasNext()){
+//							System.out.println("TAXI: " + iter.next().getClient().packageID);
+//						}
+//					}
 					eAnt= new ExplorationAnt(this, getPosition(), bm.getClients(), Mode.EXPLORE_PACKAGES);
 					eAnt.initRoadUser(truck.getRoadModel());
 					closestClient = eAnt.lookForClient();
-					System.out.println(closestClient==null);
 					if(closestClient != null){
 						foundAgent = true;
 					}
@@ -118,7 +123,7 @@ public class TaxiAgent extends Agent implements TickListener {
 			}
 		}
 		if(path == null || path.isEmpty()){
-			if(foundAgent && truck.tryPickup()){
+			if(hasAgent && truck.tryPickup()){
 				this.shouldPickup = false;
 				System.out.println("[" + truck.getTruckID() + "] I picked up " + this.packageId);
 				
@@ -135,7 +140,7 @@ public class TaxiAgent extends Agent implements TickListener {
 				System.out.println("[" + truck.getTruckID() + "] I delivered " + this.packageId);
 				hasAgent = false;
 				foundAgent = false;
-				agency.freeUpTaxi();
+				agency.freeUpTaxi(this);
 			}
 			if(!shouldPickup && !shouldDeliver){
 				destination = truck.getRoadModel().getGraph().getRandomNode(simulator.getRandomGenerator());

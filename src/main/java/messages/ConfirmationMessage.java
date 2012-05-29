@@ -6,7 +6,7 @@ import rinde.sim.core.model.communication.Message;
 
 public class ConfirmationMessage extends Message {
 
-private ClientPath closestClient;
+	private ClientPath closestClient;
 	
 	public ConfirmationMessage(CommunicationUser sender, ClientPath closestClient) {
 		super(sender);
