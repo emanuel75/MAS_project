@@ -5,6 +5,7 @@ import java.util.Queue;
 import rinde.sim.core.SimulatorAPI;
 import rinde.sim.core.SimulatorUser;
 import rinde.sim.core.graph.Point;
+import rinde.sim.core.model.RoadModel;
 import rinde.sim.core.model.communication.CommunicationAPI;
 import rinde.sim.core.model.communication.CommunicationUser;
 import rinde.sim.core.model.communication.Mailbox;
@@ -17,11 +18,16 @@ public class Agent implements SimulatorUser, CommunicationUser {
 	protected CommunicationAPI communicationAPI;
 	protected double reliability, radius;
 	protected Mailbox mailbox;
+	protected RoadModel rm;
 	
 	public Agent(double radius, double reliability){
 		this.radius = radius;
 		this.reliability = reliability;
 		this.mailbox = new Mailbox();
+	}
+	
+	public void initialize(RoadModel rm){
+		this.rm = rm;
 	}
 
 	@Override

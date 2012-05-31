@@ -1,15 +1,12 @@
 package pdp;
 
 
-import java.util.Iterator;
-import java.util.Set;
-
 import org.apache.commons.math.random.MersenneTwister;
 import org.eclipse.swt.graphics.RGB;
 
 import agents.Agency;
 import agents.ClientAgent;
-import agents.ResourceAgent;
+import agents.Truck;
 import agents.TaxiAgent;
 
 import rinde.sim.core.Simulator;
@@ -21,7 +18,6 @@ import rinde.sim.core.model.communication.CommunicationModel;
 import rinde.sim.event.Event;
 import rinde.sim.lab.common.packages.DeliveryLocation;
 import rinde.sim.lab.common.packages.Package;
-import rinde.sim.lab.common.trucks.Truck;
 import rinde.sim.scenario.ConfigurationException;
 import rinde.sim.scenario.Scenario;
 import rinde.sim.scenario.ScenarioController;
@@ -108,21 +104,8 @@ public class SimpleController extends ScenarioController{
 		Package p = new Package("Package-"+packageID++, pl, dl);
 		getSimulator().register(p);
 		ClientAgent agent = new ClientAgent(p, agency, -1, 1);
+		agent.initialize(roadModel);
 		getSimulator().register(agent);
-		return true;
-	}
-	
-	@Override
-	protected boolean handleAddResource(Event e){
-		System.out.println("lefutottam");
-		Set<Point> nodes = roadModel.getGraph().getNodes();
-		Iterator<Point> it = nodes.iterator();
-		ResourceAgent res;
-		while(it.hasNext()){
-			res = new ResourceAgent(it.next());
-			agency.addResource(res);
-			getSimulator().register(res);
-		}
 		return true;
 	}
 

@@ -6,13 +6,15 @@ import ants.ClientPath;
 
 import rinde.sim.core.graph.Point;
 
-public class ResourceAgent{ //extends Agent implements TickListener {
+public class ResourceAgent {
 	
 	private Point node;
 	private ClientPath bestClient;
 	private HashMap<ClientAgent,ClientPath> clients;
 	private HashMap<ClientAgent,ClientPath> deliveryLocs;
 	private boolean explored;
+	private int timeStep = 10000;
+	private int limit = 7500;
 
 	public ResourceAgent(Point node){
 		this.node = node;
@@ -41,8 +43,8 @@ public class ResourceAgent{ //extends Agent implements TickListener {
 		clients.put(client, path);
 	}
 	
-	public boolean exploredClient(ClientAgent client){
-		return clients.containsKey(client);
+	public boolean exploredClient(ClientAgent client, long time){
+		return clients.containsKey(client) && clients.get(client).getTime()+limit*timeStep>time;
 	}
 	
 	public ClientPath getDeliveryPath(ClientAgent client) {
@@ -53,28 +55,16 @@ public class ResourceAgent{ //extends Agent implements TickListener {
 		deliveryLocs.put(client, path);
 	}
 	
-	public boolean exploredDeliveryLoc(ClientAgent client){
-		return deliveryLocs.containsKey(client);
+	public boolean exploredDeliveryLoc(ClientAgent client, long time){
+		return deliveryLocs.containsKey(client) && deliveryLocs.get(client).getTime()+limit*timeStep>time;
 	}
 	
-	public boolean isExplored() {
-		return explored;
+	public boolean isExplored(long time) {
+		return explored && bestClient.getTime()+limit*timeStep>time;
 	}
 
 	public void setExplored(boolean explored) {
 		this.explored = explored;
 	}
-
-//	@Override
-//	public void tick(long currentTime, long timeStep) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void afterTick(long currentTime, long timeStep) {
-//		// TODO Auto-generated method stub
-//		
-//	}
 
 }

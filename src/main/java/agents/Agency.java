@@ -23,7 +23,6 @@ public class Agency extends Agent implements TickListener {
 	private HashMap<ClientAgent,TaxiAgent> clients;
 	private HashMap<Point, ResourceAgent> resources;
 	private HashSet<CommunicationUser> taxis;
-	private RoadModel rm;
 	
 	public Agency(double radius, double reliability){
 		super(radius, reliability);
@@ -32,8 +31,9 @@ public class Agency extends Agent implements TickListener {
 		this.taxis = new HashSet<CommunicationUser>();
 	}
 	
+	@Override
 	public void initialize(RoadModel rm){
-		this.rm = rm;
+		super.initialize(rm);
 		Set<Point> nodes = rm.getGraph().getNodes();
 		Iterator<Point> it = nodes.iterator();
 		ResourceAgent res;
@@ -57,7 +57,6 @@ public class Agency extends Agent implements TickListener {
 
 	@Override
 	public void tick(long currentTime, long timeStep) {
-//		System.out.println(clients.size());
 		HashMap<ClientAgent,BidMessage> bestBids = new HashMap<ClientAgent, BidMessage>();
 		Queue<Message> messages = mailbox.getMessages();
 		for(Message message : messages){

@@ -1,16 +1,13 @@
 package agents;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import ants.Ant;
 import ants.ClientPath;
 import ants.ExplorationAnt;
-import ants.ExplorationAnt.Mode;
+import ants.Ant.Mode;
 
 
 import messages.BidMessage;
@@ -18,10 +15,8 @@ import messages.BroadcastMessage;
 import messages.ConfirmationMessage;
 
 import rinde.sim.core.TickListener;
-import rinde.sim.core.graph.Graphs;
 import rinde.sim.core.graph.Point;
 import rinde.sim.core.model.communication.Message;
-import rinde.sim.lab.common.trucks.Truck;
 
 public class TaxiAgent extends Agent implements TickListener {
 
@@ -62,78 +57,54 @@ public class TaxiAgent extends Agent implements TickListener {
 		if(!hasAgent){
 			foundAgent = false;
 			Queue<Message> messages = mailbox.getMessages();
-//			ClientAgent closestClient = null;
-//			Double closestDistance = null;
 			int m = 0;
 			for(Message message : messages){
 				m++;
 				if(!hasAgent && message instanceof ConfirmationMessage){
 					ConfirmationMessage cm = (ConfirmationMessage) message;
 					setClient(cm.getClosestClient());
-					try {
-						PrintWriter pw = new PrintWriter(new FileWriter("path.txt"));
-						for(Point p : path){
-							pw.println(p);
-						}
-						pw.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+//					try {
+//						PrintWriter pw = new PrintWriter(new FileWriter("path.txt"));
+//						for(Point p : path){
+//							pw.println(p);
+//						}
+//						pw.close();
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
 					this.hasAgent = true;
 					System.out.println("[" + truck.getTruckID() + "] I made a contract with: " + this.packageId);
 					this.shouldDeliver = true;
 					this.shouldPickup = true;
 				}
 				else if(!hasAgent && (!foundAgent || messages.size()==m) && message instanceof BroadcastMessage){
-//					System.out.println("Try to find new package");
 					BroadcastMessage bm = (BroadcastMessage) message;
-//					if(truck.getTruckID().equals("Truck-3")){
-//						Iterator<ClientAgent> iter = bm.getClients().iterator();
-//						while(iter.hasNext()){
-//							System.out.println("TAXI: " + iter.next().getClient().packageID);
-//						}
-//					}
-					eAnt= new ExplorationAnt(this, getPosition(), bm.getClients(), Mode.EXPLORE_PACKAGES);
+					eAnt= new ExplorationAnt(this, getPosition(), bm.getClients(), Ant.Mode.EXPLORE_PACKAGES,currentTime);
 					eAnt.initRoadUser(truck.getRoadModel());
 					closestClient = eAnt.lookForClient();
 					if(closestClient != null){
+//						System.out.print(Graphs.pathLength((LinkedList<Point>)closestClient.getPath()));
+//						System.out.println(" <-> " + Graphs.pathLength(truck.getRoadModel().getShortestPathTo(getPosition(), closestClient.getClient().getPosition())));
 						foundAgent = true;
-					}
-//					ClientAgent client;
-//					Iterator<ClientAgent> it = bm.getClients().iterator(); 
-//					while(it.hasNext()){
-//						client = it.next();
-//						double distance = Graphs.pathLength(truck.getRoadModel().getShortestPathTo(truck, client.getPosition()));
-//						if (!foundAgent || distance < closestDistance){
-//							foundAgent = true;
-//							closestClient = client;
-//							closestDistance = distance;
-//						}
-//					} 
+					} 
 				}
 			}
 			if(!hasAgent && foundAgent){
 				System.out.println("[" + truck.getTruckID() + "] I found a client.");
-//				System.out.println(closestClient.getPath().size());
-//				System.out.println(closestClient.getTravelTime());
 				agency.receive(new BidMessage(this,closestClient));
-//				Queue q = new LinkedList<Point>();
-//				q.addAll(truck.getRoadModel().getShortestPathTo(getPosition(),closestClient.getPosition()));
-//				agency.receive(new BidMessage(this, new ClientPath(q,closestDistance, closestClient)));
 			}
 		}
 		if(path == null || path.isEmpty()){
-			if(hasAgent && truck.tryPickup()){
+			if(hasAgent && truck.tryPickup(client.getClient().getPackageID())){
 				this.shouldPickup = false;
 				System.out.println("[" + truck.getTruckID() + "] I picked up " + this.packageId);
 				
 				HashSet<ClientAgent> toDeliver = new HashSet<ClientAgent>();
 				toDeliver.add(client);
-				eAnt = new ExplorationAnt(this, getPosition(), toDeliver, Mode.EXPLORE_DELIVERY_LOC);
+				eAnt = new ExplorationAnt(this, getPosition(), toDeliver, Mode.EXPLORE_DELIVERY_LOC, currentTime);
 				eAnt.initRoadUser(truck.getRoadModel());
 				this.path = eAnt.lookForClient().getPath();
 				this.path.add(client.getDeliveryLocation());
-//				this.path = new LinkedList<Point>(truck.getRoadModel().getShortestPathTo(truck, destination));
 			}
 			if(hasAgent && truck.tryDelivery()){
 				this.shouldDeliver = false;
@@ -152,13 +123,17 @@ public class TaxiAgent extends Agent implements TickListener {
 					HashSet<ClientAgent> toExplore = new HashSet<ClientAgent>();
 					toExplore.add(client);
 					if(shouldPickup){
-						eAnt = new ExplorationAnt(this, getPosition(), toExplore, Mode.EXPLORE_PACKAGES);
+						eAnt = new ExplorationAnt(this, getPosition(), toExplore, Mode.EXPLORE_PACKAGES, currentTime);
 						eAnt.initRoadUser(truck.getRoadModel());
 						closestClient = eAnt.lookForClient();
+						if(closestClient.isDisappeared()){
+							hasAgent = false;
+							agency.freeUpTaxi(this);
+						}
 						setClient(closestClient);
 					}
 					else if(shouldDeliver){
-						eAnt = new ExplorationAnt(this, getPosition(), toExplore, Mode.EXPLORE_DELIVERY_LOC);
+						eAnt = new ExplorationAnt(this, getPosition(), toExplore, Mode.EXPLORE_DELIVERY_LOC, currentTime);
 						eAnt.initRoadUser(truck.getRoadModel());
 						this.path = eAnt.lookForClient().getPath();
 						this.path.add(client.getDeliveryLocation());

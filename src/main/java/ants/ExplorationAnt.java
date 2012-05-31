@@ -1,8 +1,5 @@
 package ants;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,16 +13,11 @@ import agents.ClientAgent;
 import agents.ResourceAgent;
 import agents.TaxiAgent;
 
-import rinde.sim.core.graph.EdgeData;
 import rinde.sim.core.graph.Graphs;
-import rinde.sim.core.graph.MultiAttributeEdgeData;
 import rinde.sim.core.graph.Point;
 import rinde.sim.core.model.RoadModel;
-import rinde.sim.lab.common.trucks.Truck;
 
 public class ExplorationAnt extends Ant {
-	
-	public enum Mode{EXPLORE_PACKAGES,EXPLORE_DELIVERY_LOC}
 	
 	private HashSet<ClientAgent> clients;
 	private Queue<Point> visitedNodes;
@@ -34,21 +26,19 @@ public class ExplorationAnt extends Ant {
 	private boolean mainAnt;
 	private HashMap<Point,ClientPath> paths;
 	private ResourceAgent res;
-	private Mode mode;
 		
-	public ExplorationAnt(TaxiAgent taxi, Point startLocation, HashSet<ClientAgent> clients, Mode mode){
-		super(taxi,startLocation);
+	public ExplorationAnt(TaxiAgent taxi, Point startLocation, HashSet<ClientAgent> clients, Mode mode, long time){
+		super(taxi,startLocation,mode,time);
 		this.clients = clients;
 		this.visitedNodes = new LinkedList<Point>();
 		this.oldVisitedNodes = new LinkedList<Point>();
 		this.mainAnt = true;
 		this.paths = new HashMap<Point, ClientPath>();
 		this.res = taxi.getResource(startLocation);
-		this.mode = mode;
 	}
 	
-	public ExplorationAnt(TaxiAgent taxi, Point startLocation, double minDistance, HashSet<ClientAgent> clients, List<Point> oldVisitedNodes, HashMap<Point,ClientPath> paths, Mode mode){
-		this(taxi,startLocation,clients,mode);
+	public ExplorationAnt(TaxiAgent taxi, Point startLocation, double minDistance, HashSet<ClientAgent> clients, List<Point> oldVisitedNodes, HashMap<Point,ClientPath> paths, Mode mode, long time){
+		this(taxi,startLocation,clients,mode,time);
 		this.oldVisitedNodes = oldVisitedNodes;
 		this.minDistance = minDistance;
 		this.mainAnt = false;
@@ -85,31 +75,9 @@ public class ExplorationAnt extends Ant {
 		}
 	}
 	
-	/**
-	 * 
-	 * @param start
-	 * @param stop
-	 * @return The travel time between two nodes
-	 */
-	private double computeTravelTime(Point start, Point stop){
-		if(start.equals(stop)){
-			return 0;
-		}
-		
-		double maxSpeed;
-		EdgeData data = rm.getGraph().connectionData(start, stop);
-		double distance = data.getLength();
-		Truck truck = ((TaxiAgent) agent).getTruck();
-		if (data instanceof MultiAttributeEdgeData) {
-			MultiAttributeEdgeData maed = (MultiAttributeEdgeData) data;
-			double speed = maed.getMaxSpeed();
-			maxSpeed = Double.isNaN(speed) ? truck.getSpeed() : Math.min(speed, truck.getSpeed());
-		}
-		else{
-			maxSpeed = truck.getSpeed();
-		}
-		
-		return distance/maxSpeed;
+	private boolean onExploredPath(ClientAgent client, Point nextNode){
+		return mode.equals(Mode.EXPLORE_PACKAGES) && res.exploredClient(client,time) && res.getClientPath(client).getPath().peek().equals(nextNode) ||
+				mode.equals(Mode.EXPLORE_DELIVERY_LOC) && res.exploredDeliveryLoc(client,time) && res.getDeliveryPath(client).getPath().peek().equals(nextNode);
 	}
 	
 	/**
@@ -117,8 +85,7 @@ public class ExplorationAnt extends Ant {
 	 * @return The shortest path from the startLocation leading to a client
 	 */
 	public ClientPath lookForClient(){
-//		System.out.println(startLocation);
-
+//		System.out.println(startLocation + ": ");
 		Collection<Point> neighbours = rm.getGraph().getOutgoingConnections(startLocation);
 		Iterator<Point> it;
 		Iterator<Double> nodes;
@@ -129,7 +96,7 @@ public class ExplorationAnt extends Ant {
 		ClientPath antPath;
 		ClientPath bestPath = null;
 		ResourceAgent nextRes;
-		
+				
 		//The oldVisitNodes containes the nodes were visited earlier on this path
 		visitedNodes.addAll(oldVisitedNodes);
 		visitedNodes.add(startLocation);
@@ -138,18 +105,22 @@ public class ExplorationAnt extends Ant {
 		cl = clients.iterator();
 		while(cl.hasNext()){
 			client = cl.next();
+			Queue<Point> noStep = new LinkedList<Point>();
+			noStep.add(startLocation);
 			if(mode.equals(Mode.EXPLORE_PACKAGES) && startLocation.equals(client.getClient().getPickupLocation())){
-//					rm.containsObjectAt(client.getClient(), startLocation)){
-				ClientPath myPath = new ClientPath(new LinkedList<Point>(), 0, client); 
+				ClientPath myPath = new ClientPath(noStep, 0, client, time);
+				if(!rm.containsObjectAt(client.getClient(), startLocation)){
+					myPath.setDisappeared();
+				}
 				res.setBestClient(myPath);
 				res.setClientPath(client, myPath);
 				res.setExplored(true);
-				return new ClientPath(visitedNodes, 0, client);
+				return new ClientPath(visitedNodes, 0, client, time);
 			}
 			else if(mode.equals(Mode.EXPLORE_DELIVERY_LOC) && startLocation.equals(client.getDeliveryLocation())){
-				ClientPath myPath = new ClientPath(new LinkedList<Point>(), 0, client); 
+				ClientPath myPath = new ClientPath(noStep, 0, client, time); 
 				res.setDeliveryPath(client, myPath);
-				return new ClientPath(visitedNodes, 0, client);
+				return new ClientPath(visitedNodes, 0, client, time);
 			}
 		}
 		
@@ -157,18 +128,32 @@ public class ExplorationAnt extends Ant {
 		double myMinDistance = computeMinDistance();
 		//We have to control how far the ants can go, because the computation time would be too much otherwise
 		//The minDistance is the minimum distance between the initial startLocation and the closest client returned by Graphs.getShortestPathTo which uses an A* search with Eucledian heuristics
-		//myMinDistance is the same distance, but not from the initial startLocation but from the current position
-		if(Graphs.pathLength((LinkedList<Point>) visitedNodes)+myMinDistance<=1.5*minDistance){
+		//myMinDistance is the same distance, but not from the nitial startLocation but from the current position
+		if(Graphs.pathLength((LinkedList<Point>) visitedNodes)+myMinDistance<=Math.min(1.3*minDistance,minDistance+5000)){
 			it = neighbours.iterator();
 			TreeMap<Double,Point> options = new TreeMap<Double, Point>();
 			double notExplored = 0;
 			double newTime;
+			boolean onExploredPath;
+			boolean exploredNow = false;
 			while(it.hasNext()){
 				nextNode = it.next();
 				nextRes = ((TaxiAgent) agent).getResource(nextNode);
-				if(!visitedNodes.contains(nextNode)){
+				onExploredPath = false;
+				cl = clients.iterator();
+				while(cl.hasNext() && !onExploredPath){
+					client = cl.next();
+					if(onExploredPath(client,nextNode)){
+						onExploredPath = true;
+						if(mode.equals(Mode.EXPLORE_PACKAGES) && res.getClientPath(client).getTime()==time ||
+							mode.equals(Mode.EXPLORE_DELIVERY_LOC) && res.getDeliveryPath(client).getTime()==time){
+							exploredNow = true;
+						}
+					}
+				}
+				if(!visitedNodes.contains(nextNode) || onExploredPath){
 					notExplored--;
-					if(mode.equals(Mode.EXPLORE_PACKAGES) && !nextRes.isExplored()){
+					if(mode.equals(Mode.EXPLORE_PACKAGES) && !nextRes.isExplored(time)){
 						options.put(notExplored,nextNode);
 					}
 					else if(mode.equals(Mode.EXPLORE_PACKAGES) &&  clients.contains(nextRes.getBestClient().getClient())){
@@ -185,8 +170,8 @@ public class ExplorationAnt extends Ant {
 						cl = clients.iterator();
 						while(cl.hasNext()){
 							client = cl.next();
-							if(mode.equals(Mode.EXPLORE_PACKAGES) && nextRes.exploredClient(client) ||
-								mode.equals(Mode.EXPLORE_DELIVERY_LOC) && nextRes.exploredDeliveryLoc(client)){
+							if(mode.equals(Mode.EXPLORE_PACKAGES) && nextRes.exploredClient(client,time) ||
+								mode.equals(Mode.EXPLORE_DELIVERY_LOC) && nextRes.exploredDeliveryLoc(client,time)){
 								if(mode.equals(Mode.EXPLORE_PACKAGES)){
 									newTime = computeTravelTime(startLocation,nextNode) + nextRes.getClientPath(client).getTravelTime();
 								}
@@ -209,6 +194,15 @@ public class ExplorationAnt extends Ant {
 				nextTime = nodes.next();
 			}
 			while(nextTime!=null && (bestPath==null || nextTime<bestPath.getTravelTime())){
+				if(exploredNow && nextTime<0){
+					if(nodes.hasNext()){
+						nextTime = nodes.next();
+					}
+					else{
+						nextTime = null;
+					}
+					continue;
+				}
 				nextNode = options.get(nextTime);
 				oldVisitedNodes = new LinkedList<Point>();
 				oldVisitedNodes.addAll(visitedNodes);
@@ -216,16 +210,34 @@ public class ExplorationAnt extends Ant {
 				//Thus it will return the best path from the next node, here we have to decide
 				//which neighbor is the best taking into account the travelTime of the best path from the neighbor
 				//and the travelTime leading to the neighbor
-				newAnt = new ExplorationAnt((TaxiAgent) agent, nextNode, minDistance, clients, oldVisitedNodes, paths, mode);
+				newAnt = new ExplorationAnt((TaxiAgent) agent, nextNode, minDistance, clients, oldVisitedNodes, paths, mode, time);
 				newAnt.initRoadUser(rm);
 				antPath = newAnt.lookForClient();
 				//If the created ant found a path and it is better than the path found so far, we store it in the bestPath
 				if(antPath != null){
 					double newTravelTime = antPath.getTravelTime()+computeTravelTime(startLocation,nextNode);
-					if(mainAnt)
-						System.out.println(mode + ": " + newTravelTime + ", " + antPath.getPath().size() + " --> " + antPath.getClient().getPosition());
+//					if(mainAnt)
+//						System.out.println(mode + ": " + newTravelTime + ", " + antPath.getPath().size() + " --> " + antPath.getClient().getPosition());
 					if(bestPath==null || bestPath.getTravelTime()>newTravelTime){
-						bestPath = new ClientPath(antPath.getPath(), newTravelTime, antPath.getClient());
+						bestPath = new ClientPath(antPath.getPath(), newTravelTime, antPath.getClient(), time);
+					}
+					if(antPath.isOnPath() && onExploredPath(antPath.getClient(), nextNode)){
+						if(antPath.isDisappeared()){
+							res.setExplored(false);
+						}
+						else{
+							if(mode.equals(Mode.EXPLORE_PACKAGES)){
+								res.getClientPath(antPath.getClient()).setTravelTime(newTravelTime);
+								res.getClientPath(antPath.getClient()).setTime(time);
+							}
+							else{
+								res.getDeliveryPath(antPath.getClient()).setTravelTime(newTravelTime);
+								res.getDeliveryPath(antPath.getClient()).setTime(time);
+							}
+						}
+					}
+					else{
+						antPath.setOffPath();
 					}
 				}
 				
@@ -237,19 +249,22 @@ public class ExplorationAnt extends Ant {
 				}
 			}
 		}
-		
 		if(bestPath!=null){
-			if(mode.equals(Mode.EXPLORE_PACKAGES) && (!res.isExplored() || !res.exploredClient(bestPath.getClient()) ||
-				res.getClientPath(bestPath.getClient()).getTravelTime() > bestPath.getTravelTime())){
-				res.setClientPath(bestPath.getClient(), bestPath);
-				if(!res.isExplored() || res.getBestClient().getTravelTime() > bestPath.getTravelTime()){
-					res.setBestClient(bestPath);
+			Queue<Point> nextStep = new LinkedList<Point>();
+			LinkedList<Point> bestPathList = (LinkedList<Point>) bestPath.getPath();
+			nextStep.add(bestPathList.get(bestPathList.lastIndexOf(startLocation)+1));
+			ClientPath myPath = new ClientPath(nextStep, bestPath.getTravelTime(), bestPath.getClient(), time);
+			if(mode.equals(Mode.EXPLORE_PACKAGES) && (!res.isExplored(time) || !res.exploredClient(bestPath.getClient(),time) ||
+				res.getClientPath(bestPath.getClient()).getTravelTime() >= bestPath.getTravelTime())){
+				res.setClientPath(bestPath.getClient(), myPath);
+				if(!res.isExplored(time) || res.getBestClient().getTravelTime() >= bestPath.getTravelTime()){
+					res.setBestClient(myPath);
 				}
 				res.setExplored(true);
 			}
-			else if(mode.equals(Mode.EXPLORE_DELIVERY_LOC) && (!res.exploredDeliveryLoc(bestPath.getClient()) || 
-					res.getDeliveryPath(bestPath.getClient()).getTravelTime() > bestPath.getTravelTime())){
-				res.setDeliveryPath(bestPath.getClient(), bestPath);
+			else if(mode.equals(Mode.EXPLORE_DELIVERY_LOC) && (!res.exploredDeliveryLoc(bestPath.getClient(),time) || 
+					res.getDeliveryPath(bestPath.getClient()).getTravelTime() >= bestPath.getTravelTime())){
+				res.setDeliveryPath(bestPath.getClient(), myPath);
 			}
 		}
 		
