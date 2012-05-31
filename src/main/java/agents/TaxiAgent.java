@@ -15,6 +15,7 @@ import messages.BroadcastMessage;
 import messages.ConfirmationMessage;
 
 import rinde.sim.core.TickListener;
+import rinde.sim.core.graph.Graphs;
 import rinde.sim.core.graph.Point;
 import rinde.sim.core.model.communication.Message;
 
@@ -83,8 +84,8 @@ public class TaxiAgent extends Agent implements TickListener {
 					eAnt.initRoadUser(truck.getRoadModel());
 					closestClient = eAnt.lookForClient();
 					if(closestClient != null){
-//						System.out.print(Graphs.pathLength((LinkedList<Point>)closestClient.getPath()));
-//						System.out.println(" <-> " + Graphs.pathLength(truck.getRoadModel().getShortestPathTo(getPosition(), closestClient.getClient().getPosition())));
+						System.out.print(Graphs.pathLength((LinkedList<Point>)closestClient.getPath()));
+						System.out.println(" <-> " + Graphs.pathLength(truck.getRoadModel().getShortestPathTo(getPosition(), closestClient.getClient().getPosition())));
 						foundAgent = true;
 					} 
 				}
@@ -178,3 +179,4 @@ public class TaxiAgent extends Agent implements TickListener {
 	}
 
 }
+

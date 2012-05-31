@@ -23,10 +23,10 @@ public class ClientAgent extends Agent implements TickListener{
 	}
 	
 	private void sendAnts(long currentTime){
-		FeasibilityAnt ant = new FeasibilityAnt(this, myClient.getPickupLocation(), Mode.EXPLORE_PACKAGES, 0);
+		FeasibilityAnt ant = new FeasibilityAnt(this, myClient.getPickupLocation(), Mode.EXPLORE_PACKAGES, currentTime);
 		ant.initRoadUser(rm);
 		ant.notifyNeighbours();
-		ant = new FeasibilityAnt(this, myClient.getDeliveryLocation(), Mode.EXPLORE_DELIVERY_LOC, 0);
+		ant = new FeasibilityAnt(this, myClient.getDeliveryLocation(), Mode.EXPLORE_DELIVERY_LOC, currentTime);
 		ant.initRoadUser(rm);
 		ant.notifyNeighbours();
 		lastSendOut = currentTime;
