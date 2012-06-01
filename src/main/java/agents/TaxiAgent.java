@@ -142,6 +142,7 @@ public class TaxiAgent extends Agent implements TickListener, Events {
 				eAnt.initRoadUser(truck.getRoadModel());
 				this.path = eAnt.lookForClient().getPath();
 				this.path.add(client.getDeliveryLocation());
+				agency.removeClient(client);
 			}
 			if(hasAgent && truck.tryDelivery()){
 				this.shouldDeliver = false;
@@ -149,7 +150,6 @@ public class TaxiAgent extends Agent implements TickListener, Events {
 				hasAgent = false;
 				foundAgent = false;
 				disp.dispatchEvent(new MyEvent(Type.DELIVERY, this, currentTime));
-				agency.removeClient(client);
 				agency.freeUpTaxi(this);
 			}
 			if(!shouldPickup && !shouldDeliver){

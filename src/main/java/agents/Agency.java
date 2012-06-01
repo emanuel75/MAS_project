@@ -103,6 +103,10 @@ public class Agency extends Agent implements TickListener {
 	public void removeClient(ClientAgent client){
 		clients.remove(client);
 	}
+	
+	public ClientAgent[] getClients(){
+		return clients.keySet().toArray(new ClientAgent[clients.keySet().size()]);
+	}
 
 	@Override
 	public void afterTick(long currentTime, long timeStep) {

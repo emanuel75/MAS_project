@@ -25,6 +25,7 @@ public class ClientAgent extends Agent implements Events, TickListener{
 	private Agency agency;
 	private int limit = 7500;
 	private long lastSendOut;
+	private long waitingTime;
 	
 	public ClientAgent(Package myClient, Agency agency, double radius, double reliability){
 		super(radius,reliability);
@@ -96,6 +97,7 @@ public class ClientAgent extends Agent implements Events, TickListener{
 		if(currentTime-lastSendOut > limit*timeStep){
 			sendAnts(currentTime);
 		}
+		waitingTime++;
 	}
 
 	@Override
@@ -106,6 +108,6 @@ public class ClientAgent extends Agent implements Events, TickListener{
 		//delegate to the event dispatcher
 		return disp.containsListener(l, eventType);
 	}
-
+	
 	
 }

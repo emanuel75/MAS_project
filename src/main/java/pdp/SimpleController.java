@@ -53,8 +53,7 @@ public class SimpleController extends PdpScenarioController {
 	private Graph<MultiAttributeEdgeData> graph;
 
 	private Vector<TaxiAgent> taxiagents;
-	private Vector<ClientAgent> clientagents;
-
+	
 	private Agency agency;
 
 	public SimpleController(Scenario scen, int numberOfTicks, String map) throws ConfigurationException {
@@ -62,7 +61,6 @@ public class SimpleController extends PdpScenarioController {
 		this.map = map;
 		this.agency = new Agency(-1, 1);
 		this.taxiagents = new Vector<TaxiAgent>();
-		this.clientagents = new Vector<ClientAgent>();
 
 		initialize();
 	}
@@ -205,7 +203,7 @@ public class SimpleController extends PdpScenarioController {
 
 	@Override
 	protected boolean handleAddTruck(Event e) {
-		Truck truck = new Truck("Truck-" + truckID++, graph.getRandomNode(getSimulator().getRandomGenerator()), 7);
+		Truck truck = new Truck("Truck-" + truckID++, graph.getRandomNode(getSimulator().getRandomGenerator()), 15);
 		getSimulator().register(truck);
 		TaxiAgent agent = new TaxiAgent(truck, agency, -1, 1);
 		getSimulator().register(agent);
@@ -228,35 +226,34 @@ public class SimpleController extends PdpScenarioController {
 		ClientAgent agent = new ClientAgent(p, agency, -1, 1);
 		agent.initialize(roadModel);
 		getSimulator().register(agent);
-		clientagents.add(agent);
 		agent.addListener(statistics, ClientAgent.Type.values());
 		agent.startWaiting(getSimulator().getCurrentTime());
 		return true;
 	}
 
-	@Override
-	/**
-	 * Cancels 10%-20% of the clients in random way
-	 */
-	protected boolean handleRemovePackage(Event e) {
-		Random rand = new Random();
-		int pos = generateRandomInteger((int) (clientagents.size() * 0.1), (int) (clientagents.size() * 0.2), rand);
-
-		ArrayList<Integer> cancelledClients = generateRandomPositions(clientagents.size(), pos);
-		Collections.sort(cancelledClients);
-
-		for (int i = cancelledClients.size(); i > 0; i--) {
-			ClientAgent agent = clientagents.get(cancelledClients.get(i - 1));
-
-			System.out.println(agent.getClient().getPackageID() + " - client has been cancelled.");
-
-			getSimulator().unregister(agent.getClient());
-			getSimulator().unregister(agent);
-			clientagents.remove(i);
-		}
-
-		return true;
-	}
+//	@Override
+//	/**
+//	 * Cancels 10%-20% of the clients in random way
+//	 */
+//	protected boolean handleRemovePackage(Event e) {
+//		Random rand = new Random();
+//		int pos = generateRandomInteger((int) (clientagents.size() * 0.1), (int) (clientagents.size() * 0.2), rand);
+//
+//		ArrayList<Integer> cancelledClients = generateRandomPositions(clientagents.size(), pos);
+//		Collections.sort(cancelledClients);
+//
+//		for (int i = cancelledClients.size(); i > 0; i--) {
+//			ClientAgent agent = clientagents.get(cancelledClients.get(i - 1));
+//
+//			System.out.println(agent.getClient().getPackageID() + " - client has been cancelled.");
+//
+//			getSimulator().unregister(agent.getClient());
+//			getSimulator().unregister(agent);
+//			clientagents.remove(i);
+//		}
+//
+//		return true;
+//	}
 
 	@Override
 	/**
@@ -265,16 +262,16 @@ public class SimpleController extends PdpScenarioController {
 	protected boolean handleRemoveClient(Event e) {
 
 		Random rand = new Random();
-		int pos = generateRandomInteger(0, clientagents.size() - 1, rand);
-//		int pos = 0;
+		ClientAgent[] clientagents = agency.getClients();
+		if(clientagents.length>0){
+			int pos = generateRandomInteger(0, clientagents.length - 1, rand);
 
-		System.out.println(clientagents.get(pos).getClient().getPackageID() + " - client has been cancelled.");
+			System.out.println(clientagents[pos].getClient().getPackageID() + " - client has been cancelled.");
 		
-		clientagents.get(pos).getClient().unregister();
-		getSimulator().unregister(clientagents.get(pos));
-		agency.removeClient(clientagents.get(pos));
-		clientagents.remove(pos);
-
+			clientagents[pos].getClient().unregister();
+			getSimulator().unregister(clientagents[pos]);
+			agency.removeClient(clientagents[pos]);
+		}
 		return true;
 	}
 
