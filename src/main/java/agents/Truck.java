@@ -102,4 +102,10 @@ public class Truck implements MovingRoadUser{
 		}
 		return false;
 	}
+
+	public void setSpeed(double speed) {
+		this.speed = speed;
+	}
+	
+	
 }

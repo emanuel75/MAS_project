@@ -109,13 +109,15 @@ public class ExplorationAnt extends Ant {
 			noStep.add(startLocation);
 			if(mode.equals(Mode.EXPLORE_PACKAGES) && startLocation.equals(client.getClient().getPickupLocation())){
 				ClientPath myPath = new ClientPath(noStep, 0, client, time);
+				ClientPath returnPath = new ClientPath(visitedNodes, 0, client, time);
 				if(!rm.containsObjectAt(client.getClient(), startLocation)){
 					myPath.setDisappeared();
+					returnPath.setDisappeared();
 				}
 				res.setBestClient(myPath);
 				res.setClientPath(client, myPath);
 				res.setExplored(true);
-				return new ClientPath(visitedNodes, 0, client, time);
+				return returnPath;
 			}
 			else if(mode.equals(Mode.EXPLORE_DELIVERY_LOC) && startLocation.equals(client.getDeliveryLocation())){
 				ClientPath myPath = new ClientPath(noStep, 0, client, time); 
@@ -224,6 +226,7 @@ public class ExplorationAnt extends Ant {
 					if(antPath.isOnPath() && onExploredPath(antPath.getClient(), nextNode)){
 						if(antPath.isDisappeared()){
 							res.setExplored(false);
+							bestPath.setDisappeared();
 						}
 						else{
 							if(mode.equals(Mode.EXPLORE_PACKAGES)){
@@ -249,7 +252,7 @@ public class ExplorationAnt extends Ant {
 				}
 			}
 		}
-		if(bestPath!=null){
+		if(bestPath!=null && !bestPath.isDisappeared()){
 			Queue<Point> nextStep = new LinkedList<Point>();
 			LinkedList<Point> bestPathList = (LinkedList<Point>) bestPath.getPath();
 			nextStep.add(bestPathList.get(bestPathList.lastIndexOf(startLocation)+1));
