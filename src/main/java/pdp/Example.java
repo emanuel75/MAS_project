@@ -19,6 +19,8 @@ public class Example {
 														StandardType.ADD_PACKAGE,
 														StandardType.REMOVE_PACKAGE,
 														MyType.ADD_AGENCY,
+														MyType.ADD_BLOCKADES,
+														MyType.GET_STAT,
 														MyType.MODIFY_SPEED,
 														MyType.CHANGE_WINTER,
 														MyType.REMOVE_CLIENT,
@@ -44,6 +46,14 @@ public class Example {
 				20 * timeStep, // end time
 				timeStep, // step
 				new ScenarioBuilder.EventTypeFunction(StandardType.ADD_PACKAGE)));
+		
+		builder.add(new ScenarioBuilder.TimeSeries<TimedEvent>(timeStep, // start time
+				20 * timeStep, // end time
+				timeStep, // step
+				new ScenarioBuilder.EventTypeFunction(MyType.GET_STAT)));
+		
+//		builder.add(new ScenarioBuilder.MultipleEventGenerator<TimedEvent>(0, 1,
+//				new ScenarioBuilder.EventTypeFunction(MyType.ADD_BLOCKADES)));
 
 		Scenario scenario = builder.build();
 
@@ -51,6 +61,8 @@ public class Example {
 										StandardType.ADD_PACKAGE,
 										StandardType.REMOVE_PACKAGE,
 										MyType.ADD_AGENCY,
+										MyType.ADD_BLOCKADES,
+										MyType.GET_STAT,
 										MyType.MODIFY_SPEED,
 										MyType.CHANGE_WINTER,
 										MyType.REMOVE_CLIENT,
@@ -69,11 +81,11 @@ public class Example {
 				3, // amount of trucks to be added
 				new ScenarioBuilder.EventTypeFunction(StandardType.ADD_TRUCK)));
 
-		/*
-		 * builder.add( new ScenarioBuilder.MultipleEventGenerator<TimedEvent>(
-		 * 0, 10, new ScenarioBuilder.EventTypeFunction(
-		 * StandardType.ADD_PACKAGE ) ) );
-		 */
+		
+		 builder.add( new ScenarioBuilder.MultipleEventGenerator<TimedEvent>(
+		 0, 10, new ScenarioBuilder.EventTypeFunction(
+		 StandardType.ADD_PACKAGE ) ) );
+		
 
 		for (int i = 0; i < 10; i++) {
 			Random rand = new Random();
@@ -128,6 +140,6 @@ public class Example {
 
 		final String MAP_DIR = "../../RinSim2/core/files/maps/";
 
-		new SimpleController(scenario2, -1, MAP_DIR + "leuven-simple.dot");
+		new SimpleController(scenario, -1, MAP_DIR + "leuven-simple.dot");
 	}
 }

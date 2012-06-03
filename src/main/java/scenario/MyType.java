@@ -2,7 +2,9 @@ package scenario;
 
 public enum MyType {
 	ADD_AGENCY,
+	ADD_BLOCKADES,
 	CHANGE_WINTER,
+	GET_STAT,
 	HEAVY_TRAFFIC,
 	MODIFY_SPEED,
 	REMOVE_CLIENT,

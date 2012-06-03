@@ -46,7 +46,7 @@ public class Ant implements RoadUser {
 			truckSpeed = truck.getSpeed();
 		}
 		else{
-			truckSpeed = 7;
+			truckSpeed = 15;
 		}
 		if (data instanceof MultiAttributeEdgeData) {
 			MultiAttributeEdgeData maed = (MultiAttributeEdgeData) data;

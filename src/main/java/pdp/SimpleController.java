@@ -41,7 +41,7 @@ import agents.TaxiAgent;
 
 public class SimpleController extends PdpScenarioController {
 
-	private final StatisticsCollector statistics = new StatisticsCollector();
+	private final StatisticsCollector statistics;
 
 	String map;
 
@@ -61,7 +61,8 @@ public class SimpleController extends PdpScenarioController {
 		this.map = map;
 		this.agency = new Agency(-1, 1);
 		this.taxiagents = new Vector<TaxiAgent>();
-
+		statistics = new StatisticsCollector(agency);
+		agency.setStatistics(statistics);
 		initialize();
 	}
 
@@ -102,8 +103,37 @@ public class SimpleController extends PdpScenarioController {
 	}
 
 	@Override
+	protected boolean handleAddBlockades(Event e) {
+		List<?> edges = roadModel.getGraph().getConnections();
+		Random rand = new Random();
+		int cnt_e = 0;
+		for (Object c : edges) {
+			if (c instanceof Connection<?>) {
+				Connection<?> conn = (Connection<?>) c;
+				EdgeData data = conn.edgeData;
+				if (data instanceof MultiAttributeEdgeData) {
+
+					MultiAttributeEdgeData maed = (MultiAttributeEdgeData) data;
+//					if(conn.from.equals(new Point(3305850.1296581556,2.5703275946063016E7)) && conn.to.equals(new Point(3304971.1277084746,2.5704134133623365E7))){
+					if (!Double.isNaN(maed.getMaxSpeed())) {
+						if (generateRandomInteger(1, 25, rand) == 1) {
+							maed.setMaxSpeed(0);
+							System.out.println("Road blockaded " );
+						}
+//						 System.out.println("Road new speed: " + speed);
+					}
+//					}
+					cnt_e++;
+				}
+			}
+		}
+		System.out.println("Number of roads: " + cnt_e);
+		return true;
+	}
+	
+	@Override
 	/**
-	 * The speed of the taxis become slower (70% of their original speed) as it would be winter
+	 * The speed of the taxis become slower (70% of their original speed) as it would be 
 	 */
 	protected boolean handleChangeWinter(Event e) {
 		System.out.println("Winter conditions");
@@ -112,6 +142,12 @@ public class SimpleController extends PdpScenarioController {
 
 		}
 
+		return true;
+	}
+	
+	@Override
+	protected boolean handleGetStat(Event e) {
+		statistics.computeAverageClientsPerTime(getSimulator().getCurrentTime(), 1000000000L);
 		return true;
 	}
 
@@ -136,10 +172,10 @@ public class SimpleController extends PdpScenarioController {
 		return true;
 	}
 
-	@Override
-	/**
+	/*@Override
+	*//**
 	 * Speed of the taxis change in the range of 5 to 10
-	 */
+	 *//*
 	protected boolean handleModifySpeed(Event e) {
 		int START = 5;
 		int END = 10;
@@ -151,7 +187,7 @@ public class SimpleController extends PdpScenarioController {
 		}
 
 		return true;
-	}
+	}*/
 
 	/**
 	 * Some of the roads become blockaded
@@ -163,10 +199,10 @@ public class SimpleController extends PdpScenarioController {
 	 * random)); System.out.println(ta.getTruck().getTruckID() +
 	 * " - new speed: " + ta.getTruck().getSpeed()); } return true; }
 	 */
-	@Override
-	/**
+	/*@Override
+	*//**
 	 * Speed of the taxis change in the range of 5 to 10
-	 */
+	 *//*
 	protected boolean handleRoadSpeed(Event e) {
 		List<?> edges = roadModel.getGraph().getConnections();
 		Random rand = new Random();
@@ -189,7 +225,7 @@ public class SimpleController extends PdpScenarioController {
 
 		return true;
 
-	}
+	}*/
 
 	public static int generateRandomInteger(int startR, int endR, Random rand) {
 		if (startR > endR) {
@@ -203,14 +239,15 @@ public class SimpleController extends PdpScenarioController {
 
 	@Override
 	protected boolean handleAddTruck(Event e) {
-		Truck truck = new Truck("Truck-" + truckID++, graph.getRandomNode(getSimulator().getRandomGenerator()), 15);
+		Truck truck = new Truck("Truck-" + truckID++, graph.getRandomNode(getSimulator().getRandomGenerator()), 7);
 		getSimulator().register(truck);
-		TaxiAgent agent = new TaxiAgent(truck, agency, -1, 1);
+		TaxiAgent agent = new TaxiAgent(truck, agency, -1, 1, statistics);
 		getSimulator().register(agent);
 		taxiagents.add(agent);
 
 		agent.addListener(statistics, TaxiAgent.Type.values());
-		agency.freeUpTaxi(agent);
+		agency.freeUpTaxi(agent,true);
+        agent.startIdle(getSimulator().getCurrentTime());
 		return true;
 	}
 
@@ -231,29 +268,29 @@ public class SimpleController extends PdpScenarioController {
 		return true;
 	}
 
-//	@Override
-//	/**
-//	 * Cancels 10%-20% of the clients in random way
-//	 */
-//	protected boolean handleRemovePackage(Event e) {
-//		Random rand = new Random();
-//		int pos = generateRandomInteger((int) (clientagents.size() * 0.1), (int) (clientagents.size() * 0.2), rand);
-//
-//		ArrayList<Integer> cancelledClients = generateRandomPositions(clientagents.size(), pos);
-//		Collections.sort(cancelledClients);
-//
-//		for (int i = cancelledClients.size(); i > 0; i--) {
-//			ClientAgent agent = clientagents.get(cancelledClients.get(i - 1));
-//
-//			System.out.println(agent.getClient().getPackageID() + " - client has been cancelled.");
-//
-//			getSimulator().unregister(agent.getClient());
-//			getSimulator().unregister(agent);
-//			clientagents.remove(i);
-//		}
-//
-//		return true;
-//	}
+	/*@Override
+	*//**
+	 * Cancels 10%-20% of the clients in random way
+	 *//*
+	protected boolean handleRemovePackage(Event e) {
+		Random rand = new Random();
+		int pos = generateRandomInteger((int) (clientagents.size() * 0.1), (int) (clientagents.size() * 0.2), rand);
+
+		ArrayList<Integer> cancelledClients = generateRandomPositions(clientagents.size(), pos);
+		Collections.sort(cancelledClients);
+
+		for (int i = cancelledClients.size(); i > 0; i--) {
+			ClientAgent agent = clientagents.get(cancelledClients.get(i - 1));
+
+			System.out.println(agent.getClient().getPackageID() + " - client has been cancelled.");
+
+			getSimulator().unregister(agent.getClient());
+			getSimulator().unregister(agent);
+			clientagents.remove(i);
+		}
+
+		return true;
+	}*/
 
 	@Override
 	/**
@@ -264,13 +301,13 @@ public class SimpleController extends PdpScenarioController {
 		Random rand = new Random();
 		ClientAgent[] clientagents = agency.getClients();
 		if(clientagents.length>0){
-			int pos = generateRandomInteger(0, clientagents.length - 1, rand);
+		int pos = generateRandomInteger(0, clientagents.length - 1, rand);
 
-			System.out.println(clientagents[pos].getClient().getPackageID() + " - client has been cancelled.");
-		
-			clientagents[pos].getClient().unregister();
-			getSimulator().unregister(clientagents[pos]);
-			agency.removeClient(clientagents[pos]);
+		System.out.println(clientagents[pos].getClient().getPackageID() + " - client has been cancelled.");
+
+		clientagents[pos].getClient().unregister();
+		getSimulator().unregister(clientagents[pos]);
+		agency.removeClient(clientagents[pos]);
 		}
 		return true;
 	}

@@ -20,8 +20,12 @@ public class PdpScenarioController extends ScenarioController {
 		switch (eT) {
 		case ADD_AGENCY:
 			return handleAddAgency(e);
+		case ADD_BLOCKADES:
+			return handleAddBlockades(e);
 		case CHANGE_WINTER:
 			return handleChangeWinter(e);
+		case GET_STAT:
+			return handleGetStat(e);
 		case HEAVY_TRAFFIC:
 			return handleHeavyTraffic(e);
 		case MODIFY_SPEED:
@@ -47,10 +51,18 @@ public class PdpScenarioController extends ScenarioController {
 		return false;
 	}
 
+	protected boolean handleAddBlockades(Event e) {
+		return false;
+	}
+	
 	protected boolean handleChangeWinter(Event e) {
 		return false;
 	}
 
+	protected boolean handleGetStat(Event e) {
+		return false;
+	}
+	
 	protected boolean handleHeavyTraffic(Event e) {
 		return false;
 	}

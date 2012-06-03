@@ -26,6 +26,7 @@ public class ClientAgent extends Agent implements Events, TickListener{
 	private int limit = 7500;
 	private long lastSendOut;
 	private long waitingTime;
+	private long maxWaitingTime = 30000;
 	
 	public ClientAgent(Package myClient, Agency agency, double radius, double reliability){
 		super(radius,reliability);
@@ -88,6 +89,14 @@ public class ClientAgent extends Agent implements Events, TickListener{
 	
 	public ResourceAgent getResource(Point node){
 		return agency.getResource(node);
+	}
+	
+	public long getWaitingTime() {
+		return waitingTime;
+	}
+
+	public long getMaxWaitingTime() {
+		return maxWaitingTime;
 	}
 
 	@Override

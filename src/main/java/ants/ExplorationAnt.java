@@ -84,8 +84,8 @@ public class ExplorationAnt extends Ant {
 	 * Dynamic programming algorithm
 	 * @return The shortest path from the startLocation leading to a client
 	 */
-	public ClientPath lookForClient(){
-//		System.out.println(startLocation + ": ");
+	public ClientPath lookForClient(double multiplier){
+//		System.out.println(((TaxiAgent) agent).getTruck().getTruckID() + " - " + startLocation + ": ");
 		Collection<Point> neighbours = rm.getGraph().getOutgoingConnections(startLocation);
 		Iterator<Point> it;
 		Iterator<Double> nodes;
@@ -131,7 +131,7 @@ public class ExplorationAnt extends Ant {
 		//We have to control how far the ants can go, because the computation time would be too much otherwise
 		//The minDistance is the minimum distance between the initial startLocation and the closest client returned by Graphs.getShortestPathTo which uses an A* search with Eucledian heuristics
 		//myMinDistance is the same distance, but not from the nitial startLocation but from the current position
-		if(Graphs.pathLength((LinkedList<Point>) visitedNodes)+myMinDistance<=Math.min(1.3*minDistance,minDistance+5000)){
+		if(Graphs.pathLength((LinkedList<Point>) visitedNodes)+myMinDistance<=Math.min(multiplier*minDistance,minDistance+3000*multiplier)){
 			it = neighbours.iterator();
 			TreeMap<Double,Point> options = new TreeMap<Double, Point>();
 			double notExplored = 0;
@@ -153,13 +153,14 @@ public class ExplorationAnt extends Ant {
 						}
 					}
 				}
-				if(!visitedNodes.contains(nextNode) || onExploredPath){
+				Double pathTime = computeTravelTime(startLocation, nextNode);
+				if(!pathTime.equals(Double.POSITIVE_INFINITY) && (!visitedNodes.contains(nextNode) || oldVisitedNodes.lastIndexOf(nextNode) == oldVisitedNodes.indexOf(nextNode) && onExploredPath)){
 					notExplored--;
 					if(mode.equals(Mode.EXPLORE_PACKAGES) && !nextRes.isExplored(time)){
 						options.put(notExplored,nextNode);
 					}
 					else if(mode.equals(Mode.EXPLORE_PACKAGES) &&  clients.contains(nextRes.getBestClient().getClient())){
-						newTime = computeTravelTime(startLocation,nextNode) + nextRes.getBestClient().getTravelTime();
+						newTime = pathTime + nextRes.getBestClient().getTravelTime();
 						if(options.containsKey(newTime)){
 							options.put(newTime+0.001, nextNode);
 						}
@@ -175,10 +176,10 @@ public class ExplorationAnt extends Ant {
 							if(mode.equals(Mode.EXPLORE_PACKAGES) && nextRes.exploredClient(client,time) ||
 								mode.equals(Mode.EXPLORE_DELIVERY_LOC) && nextRes.exploredDeliveryLoc(client,time)){
 								if(mode.equals(Mode.EXPLORE_PACKAGES)){
-									newTime = computeTravelTime(startLocation,nextNode) + nextRes.getClientPath(client).getTravelTime();
+									newTime = pathTime + nextRes.getClientPath(client).getTravelTime();
 								}
 								else{
-									newTime = computeTravelTime(startLocation,nextNode) + nextRes.getDeliveryPath(client).getTravelTime();
+									newTime = pathTime + nextRes.getDeliveryPath(client).getTravelTime();
 								}
 								if(bestTime<0 || newTime<bestTime){
 									bestTime = newTime;
@@ -214,7 +215,7 @@ public class ExplorationAnt extends Ant {
 				//and the travelTime leading to the neighbor
 				newAnt = new ExplorationAnt((TaxiAgent) agent, nextNode, minDistance, clients, oldVisitedNodes, paths, mode, time);
 				newAnt.initRoadUser(rm);
-				antPath = newAnt.lookForClient();
+				antPath = newAnt.lookForClient(multiplier);
 				//If the created ant found a path and it is better than the path found so far, we store it in the bestPath
 				if(antPath != null){
 					double newTravelTime = antPath.getTravelTime()+computeTravelTime(startLocation,nextNode);

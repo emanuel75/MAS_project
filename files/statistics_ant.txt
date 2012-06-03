@@ -1,0 +1,393 @@
+
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+
+Average waiting time: 5.368E7
+Maximum waiting time: 53680000
+
+Average pickup time: 5.366E7
+Maximum pickup time: 53660000
+
+Average waiting time: 6.088E7
+Maximum waiting time: 68080000
+
+Average pickup time: 6.086E7
+Maximum pickup time: 68060000
+
+Average waiting time: 6.766666666666667E7
+Maximum waiting time: 81240000
+
+Average pickup time: 6.764666666666667E7
+Maximum pickup time: 81220000
+Number of clients delivered per 1000000000: 0.0
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+Average delivery time: 5.368E7
+Maximum delivery time: 53680000
+Profit: 1.0727322162627405E8
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+
+Average waiting time: 7.94E7
+Maximum waiting time: 114600000
+
+Average pickup time: 5.43775E7
+Maximum pickup time: 81220000
+
+Average waiting time: 9.4424E7
+Maximum waiting time: 154520000
+
+Average pickup time: 5.293E7
+Maximum pickup time: 81220000
+Average delivery time: 7.277E7
+Maximum delivery time: 91860000
+Profit: 2.9093745603858113E8
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+Average delivery time: 6.6786666666666664E7
+Maximum delivery time: 91860000
+Profit: 4.0056526976754224E8
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+Average delivery time: 7.71E7
+Maximum delivery time: 108040000
+Profit: 6.166224771107533E8
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+Number of clients delivered per 1000000000: 20.0
+
+Average waiting time: 1.1842333333333333E8
+Maximum waiting time: 238420000
+
+Average pickup time: 5.5605E7
+Maximum pickup time: 81220000
+Number of clients delivered per 1000000000: 13.333333333333334
+
+Average waiting time: 1.4476714285714287E8
+Maximum waiting time: 302830000
+
+Average pickup time: 6.807142857142857E7
+Maximum pickup time: 142870000
+
+Average waiting time: 1.6689625E8
+Maximum waiting time: 321800000
+
+Average pickup time: 7.6125E7
+Maximum pickup time: 142870000
+Average delivery time: 1.05016E8
+Maximum delivery time: 216680000
+Profit: 1.0498064877560792E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+Number of clients delivered per 1000000000: 12.5
+Average delivery time: 1.1807E8
+Maximum delivery time: 216680000
+Profit: 1.4164385961681125E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+Average delivery time: 1.2135714285714285E8
+Maximum delivery time: 216680000
+Profit: 1.698580052505745E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+
+Average waiting time: 1.9207555555555555E8
+Maximum waiting time: 393510000
+
+Average pickup time: 8.125444444444445E7
+Maximum pickup time: 142870000
+Number of clients delivered per 1000000000: 14.0
+Average delivery time: 1.3393125E8
+Maximum delivery time: 221950000
+Profit: 2.1423750095892098E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+
+Average waiting time: 2.0737E8
+Maximum waiting time: 393510000
+
+Average pickup time: 8.3238E7
+Maximum pickup time: 142870000
+Number of clients delivered per 1000000000: 13.333333333333334
+
+Average waiting time: 2.433609090909091E8
+Maximum waiting time: 603270000
+
+Average pickup time: 9.217E7
+Maximum pickup time: 181490000
+Average delivery time: 1.2637555555555555E8
+Maximum delivery time: 221950000
+Profit: 2.274152159177258E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+
+Average waiting time: 2.767316666666667E8
+Maximum waiting time: 643810000
+
+Average pickup time: 9.282583333333333E7
+Maximum pickup time: 181490000
+
+Average waiting time: 3.084123076923077E8
+Maximum waiting time: 688580000
+
+Average pickup time: 9.165538461538461E7
+Maximum pickup time: 181490000
+Number of clients delivered per 1000000000: 12.857142857142858
+Average delivery time: 1.35841E8
+Maximum delivery time: 221950000
+Profit: 2.7160966619140654E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+Average delivery time: 1.3463272727272728E8
+Maximum delivery time: 221950000
+Profit: 2.9611771237150564E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+Average delivery time: 1.3347E8
+Maximum delivery time: 221950000
+Profit: 3.2025057690551624E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+Number of clients delivered per 1000000000: 15.0
+
+Average waiting time: 3.226914285714286E8
+Maximum waiting time: 688580000
+
+Average pickup time: 9.1E7
+Maximum pickup time: 181490000
+Average delivery time: 1.2702384615384616E8
+Maximum delivery time: 221950000
+Profit: 3.301747677067622E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+
+Average waiting time: 3.257E8
+Maximum waiting time: 688580000
+
+Average pickup time: 9.515066666666667E7
+Maximum pickup time: 181490000
+Average delivery time: 1.3200357142857143E8
+Maximum delivery time: 221950000
+Profit: 3.6951996922261753E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+
+Average waiting time: 3.35839375E8
+Maximum waiting time: 688580000
+
+Average pickup time: 9.69175E7
+Maximum pickup time: 181490000
+Number of clients delivered per 1000000000: 15.555555555555557
+Average delivery time: 1.2743933333333333E8
+Maximum delivery time: 221950000
+Profit: 3.8222312460717916E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+
+Average waiting time: 3.179305882352941E8
+Maximum waiting time: 688580000
+
+Average pickup time: 9.12170588235294E7
+Maximum pickup time: 181490000
+
+Average waiting time: 3.083411111111111E8
+Maximum waiting time: 688580000
+
+Average pickup time: 8.948166666666667E7
+Maximum pickup time: 181490000
+Average delivery time: 1.25791875E8
+Maximum delivery time: 221950000
+Profit: 4.0243351490677066E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+Number of clients delivered per 1000000000: 16.0
+
+Average waiting time: 3.1401842105263156E8
+Maximum waiting time: 688580000
+
+Average pickup time: 9.309842105263157E7
+Maximum pickup time: 181490000
+Average delivery time: 1.2435058823529412E8
+Maximum delivery time: 221950000
+Profit: 4.226869881765639E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+
+Average waiting time: 3.17246E8
+Maximum waiting time: 688580000
+
+Average pickup time: 9.29205E7
+Maximum pickup time: 181490000
+Number of clients delivered per 1000000000: 15.454545454545453
+Average delivery time: 1.2703444444444445E8
+Maximum delivery time: 221950000
+Profit: 4.572139426698935E9
+
+Average idle time: 20000.0
+Maximum idle time: 20000
+Average delivery time: 1.2587526315789473E8
+Maximum delivery time: 221950000
+Profit: 4.782142337156989E9
+
+Average waiting time: 3.107614285714286E8
+Maximum waiting time: 688580000
+
+Average pickup time: 9.489761904761904E7
+Maximum pickup time: 181490000
+Number of clients delivered per 1000000000: 15.833333333333334
+
+Average idle time: 3444782.6086956523
+Maximum idle time: 78790000
+
+Average waiting time: 3.0218954545454544E8
+Maximum waiting time: 688580000
+
+Average pickup time: 9.595272727272727E7
+Maximum pickup time: 181490000
+Average delivery time: 1.27641E8
+Maximum delivery time: 221950000
+Profit: 5.104424644011461E9
+Number of clients delivered per 1000000000: 15.384615384615385
+Average delivery time: 1.2836238095238096E8
+Maximum delivery time: 221950000
+Profit: 5.389938981067086E9
+
+Average idle time: 3302083.3333333335
+Maximum idle time: 78790000
+Average delivery time: 1.2732E8
+Maximum delivery time: 221950000
+Profit: 5.600798387436445E9
+
+Average waiting time: 2.9658434782608694E8
+Maximum waiting time: 688580000
+
+Average pickup time: 9.931391304347827E7
+Maximum pickup time: 181490000
+Number of clients delivered per 1000000000: 15.714285714285715
+
+Average idle time: 6066000.0
+Maximum idle time: 78790000
+
+Average waiting time: 2.909445833333333E8
+Maximum waiting time: 688580000
+
+Average pickup time: 1.0089875E8
+Maximum pickup time: 181490000
+Number of clients delivered per 1000000000: 14.666666666666666
+
+Average waiting time: 2.843792E8
+Maximum waiting time: 688580000
+
+Average pickup time: 1.019348E8
+Maximum pickup time: 181490000
+Average delivery time: 1.289095652173913E8
+Maximum delivery time: 221950000
+Profit: 5.9284192869201765E9
+
+Average idle time: 5833461.538461538
+Maximum idle time: 78790000
+Number of clients delivered per 1000000000: 14.375
+Average delivery time: 1.275525E8
+Maximum delivery time: 221950000
+Profit: 6.121031452012446E9
+
+Average idle time: 5618148.148148148
+Maximum idle time: 78790000
+Number of clients delivered per 1000000000: 14.117647058823529
+
+Average waiting time: 2.8145E8
+Maximum waiting time: 688580000
+
+Average pickup time: 1.0459307692307693E8
+Maximum pickup time: 181490000
+Average delivery time: 1.332592E8
+Maximum delivery time: 270220000
+Profit: 6.661395469317945E9
+
+Average idle time: 5418214.285714285
+Maximum idle time: 78790000
+
+Average waiting time: 2.744022222222222E8
+Maximum waiting time: 688580000
+
+Average pickup time: 1.0293E8
+Maximum pickup time: 181490000
+Number of clients delivered per 1000000000: 13.88888888888889
+
+Average waiting time: 2.7374571428571427E8
+Maximum waiting time: 688580000
+
+Average pickup time: 1.0757E8
+Maximum pickup time: 232850000
+Number of clients delivered per 1000000000: 13.157894736842104
+Average delivery time: 1.3568653846153846E8
+Maximum delivery time: 270220000
+Profit: 7.053989113354078E9
+
+Average idle time: 5232068.9655172415
+Maximum idle time: 78790000
+Number of clients delivered per 1000000000: 13.0
+Average delivery time: 1.392277777777778E8
+Maximum delivery time: 270220000
+Profit: 7.516507204934138E9
+
+Average idle time: 5058333.333333333
+Maximum idle time: 78790000
+
+Average waiting time: 2.727679310344828E8
+Maximum waiting time: 688580000
+
+Average pickup time: 1.087151724137931E8
+Maximum pickup time: 232850000
+Average delivery time: 1.353567857142857E8
+Maximum delivery time: 270220000
+Profit: 7.578147472836872E9
+
+Average idle time: 4895806.451612903
+Maximum idle time: 78790000
+
+Average waiting time: 2.713943333333333E8
+Maximum waiting time: 688580000
+
+Average pickup time: 1.0872733333333333E8
+Maximum pickup time: 232850000
+Average delivery time: 1.4156551724137932E8
+Maximum delivery time: 315410000
+Profit: 8.208905269782736E9
+
+Average waiting time: 2.700074193548387E8
+Maximum waiting time: 688580000
+
+Average pickup time: 1.1012806451612903E8
+Maximum pickup time: 232850000
+Average delivery time: 1.4008766666666666E8
+Maximum delivery time: 315410000
+Profit: 8.403338672329018E9
+Average delivery time: 1.407458064516129E8
+Maximum delivery time: 315410000
+Profit: 8.72428297257354E9
